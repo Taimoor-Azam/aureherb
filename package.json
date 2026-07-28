@@ -1,0 +1,33 @@
+{
+  "name": "aureherb",
+  "private": true,
+  "packageManager": "pnpm@10.11.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "start": "turbo start",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "backend:migrate": "pnpm --filter=@dtc/backend exec medusa db:migrate",
+    "backend:seed": "pnpm --filter=@dtc/backend exec medusa db:migrate",
+    "backend:user": "pnpm --filter=@dtc/backend exec medusa user -e admin@aureherb.local -p supersecret",
+    "backend:dev": "pnpm --filter=@dtc/backend dev",
+    "storefront:dev": "pnpm --filter=@dtc/storefront dev"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.0.5",
+      "@types/react-dom": "19.0.5"
+    }
+  },
+  "devDependencies": {
+    "@medusajs/eslint-plugin": "2.16.0",
+    "eslint": "^9.39.4",
+    "jiti": "^2.7.0",
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.14"
+  }
+}
