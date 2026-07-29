@@ -1,0 +1,10 @@
+# Railway service config for Medusa backend.
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm --filter=@dtc/backend build"
+
+[deploy]
+startCommand = "pnpm --filter=@dtc/backend start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
