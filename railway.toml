@@ -1,9 +1,8 @@
 # Railway service config for Medusa backend.
-# Prefer Dockerfile so admin UI assets from `medusa build` are kept in the image.
 
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile.backend"
+builder = "NIXPACKS"
+buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm --filter=@dtc/backend build"
 
 [deploy]
 startCommand = "pnpm --filter=@dtc/backend exec medusa db:migrate && pnpm --filter=@dtc/backend start"
