@@ -14,7 +14,8 @@ module.exports = defineConfig({
     }
   },
   admin: {
-    maxUploadFileSize: 10 * 1024 * 1024, // 10MB
+    maxUploadFileSize: 10 * 1024 * 1024,
+    disable: process.env.NODE_ENV === "production",
   },
   modules: [
     {
