@@ -1,8 +1,10 @@
 # Railway service config for Medusa backend.
+# Admin UI is prebuilt locally into apps/backend/.medusa and uploaded with
+# `railway up --no-gitignore` (Railway free tier OOMs building admin).
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm --filter=@dtc/backend build"
+buildCommand = "corepack enable && pnpm install --frozen-lockfile"
 
 [deploy]
 startCommand = "pnpm --filter=@dtc/backend exec medusa db:migrate && pnpm --filter=@dtc/backend start"
