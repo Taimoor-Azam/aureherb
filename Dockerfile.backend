@@ -12,9 +12,8 @@ RUN corepack enable && corepack prepare pnpm@10.11.1 --activate
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm --filter=@dtc/backend build \
-  && find apps/backend/.medusa -name 'index.html' | grep -E . \
-  && ls -la apps/backend/.medusa || true
+# Admin UI is included when DISABLE_ADMIN is not true (set at runtime/build via Railway vars).
+RUN pnpm --filter=@dtc/backend build
 
 FROM node:20-bookworm-slim AS runner
 
