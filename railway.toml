@@ -1,12 +1,11 @@
 # Railway service config for Medusa backend.
-# Admin UI assets live under apps/backend/.medusa — Railpack/Nixpacks
-# runtime stages often omit that folder, so rebuild on start before medusa start.
+# Prefer Dockerfile so admin UI assets from `medusa build` are kept in the image.
 
 [build]
-builder = "NIXPACKS"
-buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm --filter=@dtc/backend build"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.backend"
 
 [deploy]
-startCommand = "pnpm --filter=@dtc/backend exec medusa db:migrate && pnpm --filter=@dtc/backend build && pnpm --filter=@dtc/backend start"
+startCommand = "pnpm --filter=@dtc/backend exec medusa db:migrate && pnpm --filter=@dtc/backend start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
