@@ -144,7 +144,7 @@ const SideMenu = ({ locales, currentLocale }: SideMenuProps) => {
                         </div>
                       )}
                       <Text className="txt-compact-small text-herb-mist">
-                        © {new Date().getFullYear()} AureHerb. Pay on delivery.
+                        © {new Date().getFullYear()} AureHerb.
                       </Text>
                     </div>
                   </div>

@@ -141,7 +141,7 @@ export default async function Footer() {
         </div>
         <div className="flex w-full mb-10 justify-between text-[#7a847c]">
           <Text className="txt-compact-small">
-            © {new Date().getFullYear()} AureHerb. Pay on delivery.
+            © {new Date().getFullYear()} AureHerb.
           </Text>
         </div>
       </div>
