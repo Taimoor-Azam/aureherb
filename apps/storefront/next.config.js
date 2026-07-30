@@ -39,6 +39,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.s3.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "media.aureherb.com",
+      },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {

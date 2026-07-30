@@ -50,7 +50,25 @@ MEDUSA_BACKEND_URL=https://api.aureherb.com
 RESEND_API_KEY=<resend-api-key>
 RESEND_FROM=AureHerb <orders@aureherb.com>
 RESEND_REPLY_TO=info.aure.herb@gmail.com
+
+# Cloudflare R2 (persistent product images — not local static/ disk)
+S3_FILE_URL=https://pub-xxxxx.r2.dev
+S3_ACCESS_KEY_ID=<r2-access-key-id>
+S3_SECRET_ACCESS_KEY=<r2-secret-access-key>
+S3_REGION=auto
+S3_BUCKET=aureherb-media
+S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
 ```
+
+### Cloudflare R2 setup
+
+1. Cloudflare dashboard → **R2** → Create bucket `aureherb-media`.
+2. Bucket **Settings** → enable **Public access** (R2.dev subdomain) and copy `S3_FILE_URL` (e.g. `https://pub-xxxxx.r2.dev`).
+3. **Manage R2 API Tokens** → create token with Object Read & Write on that bucket → copy Access Key ID + Secret.
+4. Account ID from R2 overview → `S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
+5. Optional CORS: origins `https://api.aureherb.com`, `http://localhost:9000`; methods `GET`, `PUT`, `HEAD`.
+
+After R2 is live, re-upload product images in admin (old `/static/` URLs will 404).
 
 Generate secrets locally (PowerShell):
 
@@ -129,5 +147,6 @@ If CORS errors appear, confirm Railway CORS vars match the final URLs and redepl
 - [ ] Shipping: PKR 249 under 3000 / free at 3000+  
 - [ ] COD payment enabled  
 - [ ] Publishable key matches Vercel env  
-- [ ] Product images uploaded on production (local `static/` files may need re-upload)
-- [ ] SMTP_PASS set on Railway (Gmail App Password for `info.aure.herb@gmail.com`) so order/shipped emails send
+- [ ] Cloudflare R2 `S3_*` vars set on Railway; product images re-uploaded (R2 URLs, not `/static/`)
+- [ ] Resend: domain `aureherb.com` verified + `RESEND_API_KEY` set on Railway so order/shipped emails send
+- [ ] Revoke old Gmail App Password if it was used for SMTP (no longer needed)
