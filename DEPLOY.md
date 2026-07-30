@@ -46,12 +46,10 @@ AUTH_CORS=https://api.aureherb.com,https://www.aureherb.com,https://aureherb.com
 NODE_ENV=production
 MEDUSA_BACKEND_URL=https://api.aureherb.com
 
-# Order emails (Gmail SMTP via info.aure.herb@gmail.com App Password)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=info.aure.herb@gmail.com
-SMTP_PASS=<gmail-app-password>
-SMTP_FROM=AureHerb <info.aure.herb@gmail.com>
+# Order emails via Resend (HTTPS — works on Railway Hobby; Gmail SMTP is blocked there)
+RESEND_API_KEY=<resend-api-key>
+RESEND_FROM=AureHerb <orders@aureherb.com>
+RESEND_REPLY_TO=info.aure.herb@gmail.com
 ```
 
 Generate secrets locally (PowerShell):

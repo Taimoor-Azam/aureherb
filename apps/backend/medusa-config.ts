@@ -49,18 +49,16 @@ module.exports = defineConfig({
             },
           },
           {
-            resolve: "./src/modules/smtp-notification",
-            id: "smtp",
+            resolve: "./src/modules/resend-notification",
+            id: "resend",
             options: {
               channels: ["email"],
-              host: process.env.SMTP_HOST || "smtp.gmail.com",
-              port: process.env.SMTP_PORT || "587",
-              secure: process.env.SMTP_SECURE === "true",
-              user: process.env.SMTP_USER || "info.aure.herb@gmail.com",
-              pass: process.env.SMTP_PASS,
+              api_key: process.env.RESEND_API_KEY,
               from:
-                process.env.SMTP_FROM ||
-                "AureHerb <info.aure.herb@gmail.com>",
+                process.env.RESEND_FROM ||
+                "AureHerb <orders@aureherb.com>",
+              reply_to:
+                process.env.RESEND_REPLY_TO || "info.aure.herb@gmail.com",
             },
           },
         ],
