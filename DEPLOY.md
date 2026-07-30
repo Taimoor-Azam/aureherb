@@ -44,6 +44,14 @@ STORE_CORS=https://www.aureherb.com,https://aureherb.com
 ADMIN_CORS=https://api.aureherb.com,https://www.aureherb.com
 AUTH_CORS=https://api.aureherb.com,https://www.aureherb.com,https://aureherb.com
 NODE_ENV=production
+MEDUSA_BACKEND_URL=https://api.aureherb.com
+
+# Order emails (Gmail SMTP via info.aure.herb@gmail.com App Password)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=info.aure.herb@gmail.com
+SMTP_PASS=<gmail-app-password>
+SMTP_FROM=AureHerb <info.aure.herb@gmail.com>
 ```
 
 Generate secrets locally (PowerShell):
@@ -93,13 +101,19 @@ Until `api.aureherb.com` DNS works, you can temporarily use the Railway `*.up.ra
 
 ## 4. Hostinger DNS
 
-In Hostinger DNS for `aureherb.com`, set records as Vercel and Railway show (values are account-specific):
+In Hostinger DNS Zone for `aureherb.com`, replace conflicting `@` / `www` / `api` records with:
 
 | Type | Name | Value | Purpose |
 |------|------|--------|---------|
-| CNAME | `www` | Vercel CNAME target (often `cname.vercel-dns.com`) | Shop |
-| A / ALIAS | `@` | Per Vercel domain instructions | Apex |
-| CNAME | `api` | Railway custom-domain target | Medusa API |
+| CNAME | `www` | `26649f6ff147f06b.vercel-dns-017.com` | Shop |
+| A | `@` | `216.198.79.1` | Apex (Vercel) |
+| A | `@` | `64.29.17.1` | Apex (Vercel) |
+| CNAME | `api` | `8v2bq31u.up.railway.app` | Medusa API |
+| TXT | `_railway-verify.api` | `railway-verify=205b4de6eb1153e22d494c9fe19664eb8fe481562cfd2a2f7b003d9224351f73` | Railway ownership |
+
+If Hostinger only allows one A for `@`, use `76.76.21.21` instead of the two A records above.
+
+Remove old WordPress A/CNAME records that conflict after you backup Files + Database.
 
 Wait for DNS (often 5–60 minutes). Confirm:
 
@@ -118,3 +132,4 @@ If CORS errors appear, confirm Railway CORS vars match the final URLs and redepl
 - [ ] COD payment enabled  
 - [ ] Publishable key matches Vercel env  
 - [ ] Product images uploaded on production (local `static/` files may need re-upload)
+- [ ] SMTP_PASS set on Railway (Gmail App Password for `info.aure.herb@gmail.com`) so order/shipped emails send

@@ -36,5 +36,35 @@ module.exports = defineConfig({
         ],
       },
     },
+    {
+      resolve: "@medusajs/medusa/notification",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/notification-local",
+            id: "local",
+            options: {
+              name: "Local Notification Provider",
+              channels: ["feed"],
+            },
+          },
+          {
+            resolve: "./src/modules/smtp-notification",
+            id: "smtp",
+            options: {
+              channels: ["email"],
+              host: process.env.SMTP_HOST || "smtp.gmail.com",
+              port: process.env.SMTP_PORT || "587",
+              secure: process.env.SMTP_SECURE === "true",
+              user: process.env.SMTP_USER || "info.aure.herb@gmail.com",
+              pass: process.env.SMTP_PASS,
+              from:
+                process.env.SMTP_FROM ||
+                "AureHerb <info.aure.herb@gmail.com>",
+            },
+          },
+        ],
+      },
+    },
   ],
 })
