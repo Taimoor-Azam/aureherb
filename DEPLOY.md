@@ -52,6 +52,7 @@ RESEND_FROM=AureHerb <orders@aureherb.com>
 RESEND_REPLY_TO=info.aure.herb@gmail.com
 
 # Cloudflare R2 (persistent product images — not local static/ disk)
+# When S3_BUCKET is set, Medusa uses R2; otherwise it falls back to local static/
 S3_FILE_URL=https://pub-xxxxx.r2.dev
 S3_ACCESS_KEY_ID=<r2-access-key-id>
 S3_SECRET_ACCESS_KEY=<r2-secret-access-key>
@@ -62,11 +63,12 @@ S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
 
 ### Cloudflare R2 setup
 
-1. Cloudflare dashboard → **R2** → Create bucket `aureherb-media`.
-2. Bucket **Settings** → enable **Public access** (R2.dev subdomain) and copy `S3_FILE_URL` (e.g. `https://pub-xxxxx.r2.dev`).
-3. **Manage R2 API Tokens** → create token with Object Read & Write on that bucket → copy Access Key ID + Secret.
-4. Account ID from R2 overview → `S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
-5. Optional CORS: origins `https://api.aureherb.com`, `http://localhost:9000`; methods `GET`, `PUT`, `HEAD`.
+1. Open [R2 Overview](https://dash.cloudflare.com/?to=/:account/r2/overview) and **enable / purchase R2** if prompted (required once per account).
+2. Create bucket `aureherb-media`.
+3. Bucket **Settings** → enable **Public Development URL** (r2.dev) and copy `S3_FILE_URL` (e.g. `https://pub-xxxxx.r2.dev`). For production later, prefer a custom domain like `media.aureherb.com`.
+4. **Manage R2 API Tokens** → create token with Object Read & Write on that bucket → copy Access Key ID + Secret.
+5. Account ID from R2 overview → `S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
+6. Optional CORS: origins `https://api.aureherb.com`, `http://localhost:9000`; methods `GET`, `PUT`, `HEAD`.
 
 After R2 is live, re-upload product images in admin (old `/static/` URLs will 404).
 
