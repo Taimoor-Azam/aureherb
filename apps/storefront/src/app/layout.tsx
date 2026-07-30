@@ -1,4 +1,5 @@
 import { getBaseURL } from "@lib/util/env"
+import WhatsAppButton from "@modules/layout/components/whatsapp-button"
 import { Metadata } from "next"
 import "styles/globals.css"
 
@@ -33,6 +34,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       </head>
       <body className="bg-herb-sand text-herb-ink font-sans antialiased">
         <main className="relative">{props.children}</main>
+        <WhatsAppButton />
       </body>
     </html>
   )
