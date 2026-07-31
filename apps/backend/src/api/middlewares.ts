@@ -6,6 +6,13 @@ import {
 export default defineMiddlewares({
   routes: [
     {
+      matcher: "/hooks/whatsapp",
+      bodyParser: {
+        preserveRawBody: true,
+      },
+      method: ["POST"],
+    },
+    {
       matcher: "/store/product-reviews",
       method: ["POST"],
       middlewares: [authenticate("customer", ["session", "bearer"])],

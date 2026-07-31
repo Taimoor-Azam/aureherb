@@ -59,6 +59,14 @@ S3_SECRET_ACCESS_KEY=<r2-secret-access-key>
 S3_REGION=auto
 S3_BUCKET=aureherb-media
 S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+
+# WhatsApp Cloud API bot (see section below)
+WHATSAPP_TOKEN=<meta-access-token>
+WHATSAPP_PHONE_NUMBER_ID=<phone-number-id>
+WHATSAPP_VERIFY_TOKEN=<meta-webhook-verify-token>
+WHATSAPP_APP_SECRET=<meta-app-secret>
+WHATSAPP_USE_TEMPLATES=false
+GEMINI_API_KEY=<google-ai-studio-key>
 ```
 
 ### Cloudflare R2 setup
@@ -71,6 +79,52 @@ S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
 6. Optional CORS: origins `https://api.aureherb.com`, `http://localhost:9000`; methods `GET`, `PUT`, `HEAD`.
 
 After R2 is live, re-upload product images in admin (old `/static/` URLs will 404).
+
+### WhatsApp Cloud API bot (free Meta path)
+
+Outbound order confirm/shipped messages + inbound confirm/cancel, oils Q&A (Gemini), and reorder.
+
+1. Create a Meta app → add **WhatsApp** product → start with the test number (then attach your business number).
+2. In Meta → WhatsApp → **Configuration**:
+   - Callback URL: `https://api.aureherb.com/hooks/whatsapp`
+   - Verify token: any long random string (same as `WHATSAPP_VERIFY_TOKEN` below)
+3. Subscribe to the `messages` webhook field.
+4. Copy **Phone number ID** and a permanent **System User** access token (`WHATSAPP_TOKEN`).
+5. Create and submit message templates (utility) for approval (required to message customers first outside the 24h window):
+
+| Template name (default) | Purpose | Example body vars |
+|-------------------------|---------|-------------------|
+| `order_placed_confirm` | Ask Confirm/Cancel | `{{1}}` = display id, `{{2}}` = total |
+| `order_shipped` | Courier handed over | `{{1}}` = display id |
+
+Until templates are approved, leave `WHATSAPP_USE_TEMPLATES` unset/`false` — the bot sends interactive Confirm/Cancel buttons (works after the customer has messaged you / in the test window).
+
+6. Get a free [Google AI Studio](https://aistudio.google.com/apikey) key for Gemini oils Q&A → `GEMINI_API_KEY`.
+
+Add to Railway variables:
+
+```env
+WHATSAPP_TOKEN=<meta-access-token>
+WHATSAPP_PHONE_NUMBER_ID=<phone-number-id>
+WHATSAPP_VERIFY_TOKEN=<same-as-meta-verify-token>
+WHATSAPP_APP_SECRET=<meta-app-secret>
+WHATSAPP_USE_TEMPLATES=false
+# Optional overrides once approved:
+# WHATSAPP_TEMPLATE_ORDER_CONFIRM=order_placed_confirm
+# WHATSAPP_TEMPLATE_ORDER_SHIPPED=order_shipped
+# WHATSAPP_API_VERSION=v21.0
+GEMINI_API_KEY=<google-ai-studio-key>
+# GEMINI_MODEL=gemini-2.0-flash
+```
+
+**Behaviour**
+
+- `order.placed` with a shipping phone → WhatsApp Confirm/Cancel (Confirm only logs `metadata.whatsapp_confirmed_at`; Cancel runs Medusa cancel).
+- `shipment.created` → “handed to courier” WhatsApp notice.
+- Free-form chat → Gemini oils-only answers (refuses off-topic).
+- “reorder” / “order again” → list recent orders for that phone → recreate COD cart/order.
+
+Storefront floating button can stay on `+923137022646` for human chat; the Cloud API number can be the same after migration or a dedicated bot number.
 
 Generate secrets locally (PowerShell):
 
@@ -151,4 +205,6 @@ If CORS errors appear, confirm Railway CORS vars match the final URLs and redepl
 - [ ] Publishable key matches Vercel env  
 - [ ] Cloudflare R2 `S3_*` vars set on Railway; product images re-uploaded (R2 URLs, not `/static/`)
 - [ ] Resend: domain `aureherb.com` verified + `RESEND_API_KEY` set on Railway so order/shipped emails send
+- [ ] WhatsApp Cloud API: Railway env vars + Meta webhook `https://api.aureherb.com/hooks/whatsapp` + templates approved before `WHATSAPP_USE_TEMPLATES=true`
+- [ ] Gemini: `GEMINI_API_KEY` set for oils Q&A
 - [ ] Revoke old Gmail App Password if it was used for SMTP (no longer needed)

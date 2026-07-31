@@ -2,6 +2,11 @@ import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import type { INotificationModuleService } from "@medusajs/framework/types"
 import { buildOrderShippedEmail } from "../utils/order-emails"
+import {
+  isWhatsAppConfigured,
+  sendOrderShippedNotice,
+} from "../lib/whatsapp/client"
+import { normalizeWhatsAppPhone } from "../lib/whatsapp/phone"
 
 type ShipmentCreatedPayload = {
   id: string
@@ -48,27 +53,10 @@ export default async function shipmentCreatedHandler({
       },
     })
 
-    const fulfillment = fulfillments?.[0]
-    const order = fulfillment?.order as
-      | {
-          id?: string
-          display_id?: number | null
-          email?: string | null
-          currency_code?: string | null
-          total?: number | null
-          items?: Array<{
-            title?: string | null
-            quantity?: number | null
-            unit_price?: number | null
-            subtitle?: string | null
-          }> | null
-          shipping_address?: Record<string, unknown> | null
-        }
-      | undefined
+    const fulfillment = fulfillments?.[0] as any
+    let resolvedOrder = fulfillment?.order as any
 
-    // Fallback: some graphs expose order via order_link / separate query
-    let resolvedOrder = order
-    if (!resolvedOrder?.email) {
+    if (!resolvedOrder?.email && !resolvedOrder?.shipping_address) {
       const { data: orderFulfillments } = await query.graph({
         entity: "order",
         fields: [
@@ -88,46 +76,65 @@ export default async function shipmentCreatedHandler({
           fulfillments: {
             id: data.id,
           },
-        },
+        } as any,
       })
-      resolvedOrder = orderFulfillments?.[0]
-    }
-
-    if (!resolvedOrder?.email) {
-      logger.warn(
-        `shipment.created: could not resolve order email for fulfillment ${data.id}`
-      )
-      return
+      resolvedOrder = orderFulfillments?.[0] as any
     }
 
     const trackingNumbers = Array.isArray(fulfillment?.tracking_numbers)
       ? (fulfillment.tracking_numbers as string[])
       : []
 
-    const content = buildOrderShippedEmail({
-      id: resolvedOrder.id || data.id,
-      display_id: resolvedOrder.display_id,
-      email: resolvedOrder.email,
-      currency_code: resolvedOrder.currency_code,
-      total: resolvedOrder.total,
-      items: resolvedOrder.items,
-      shipping_address: resolvedOrder.shipping_address as any,
-      tracking_numbers: trackingNumbers,
-    })
+    if (resolvedOrder?.email) {
+      const content = buildOrderShippedEmail({
+        id: resolvedOrder.id || data.id,
+        display_id: resolvedOrder.display_id,
+        email: resolvedOrder.email,
+        currency_code: resolvedOrder.currency_code,
+        total: resolvedOrder.total,
+        items: resolvedOrder.items,
+        shipping_address: resolvedOrder.shipping_address,
+        tracking_numbers: trackingNumbers,
+      })
 
-    await notificationModuleService.createNotifications({
-      to: resolvedOrder.email,
-      channel: "email",
-      template: "order-shipped",
-      content,
-    })
+      await notificationModuleService.createNotifications({
+        to: resolvedOrder.email,
+        channel: "email",
+        template: "order-shipped",
+        content,
+      })
 
-    logger.info(
-      `shipment.created: shipped email sent for order ${resolvedOrder.id}`
-    )
+      logger.info(
+        `shipment.created: shipped email sent for order ${resolvedOrder.id}`
+      )
+    } else {
+      logger.warn(
+        `shipment.created: could not resolve order email for fulfillment ${data.id}`
+      )
+    }
+
+    const phone = normalizeWhatsAppPhone(resolvedOrder?.shipping_address?.phone)
+
+    if (phone && isWhatsAppConfigured() && resolvedOrder) {
+      try {
+        await sendOrderShippedNotice({
+          to: phone,
+          displayId: resolvedOrder.display_id ?? resolvedOrder.id ?? data.id,
+          tracking: trackingNumbers[0],
+        })
+        logger.info(
+          `shipment.created: WhatsApp shipped notice sent for order ${resolvedOrder.id}`
+        )
+      } catch (waError) {
+        logger.error(
+          `shipment.created: WhatsApp notify failed for fulfillment ${data.id}`,
+          waError
+        )
+      }
+    }
   } catch (error) {
     logger.error(
-      `shipment.created: failed to send shipped email for fulfillment ${data.id}`,
+      `shipment.created: failed to send shipped notice for fulfillment ${data.id}`,
       error
     )
   }
