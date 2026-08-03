@@ -1,6 +1,6 @@
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
-import { Text, clx } from "@modules/common/components/ui"
+import { clx } from "@modules/common/components/ui"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
@@ -14,18 +14,6 @@ export default async function Footer() {
     <footer className="border-t border-[#d7d0c3] w-full bg-[#f3eee4]">
       <div className="content-container flex flex-col w-full">
         <div className="flex flex-col gap-y-10 xsmall:flex-row items-start justify-between py-16 small:py-24">
-          <div className="max-w-sm">
-            <LocalizedClientLink
-              href="/"
-              className="font-display text-2xl tracking-[0.04em] text-[#1c2d22] uppercase"
-            >
-              AureHerb
-            </LocalizedClientLink>
-            <p className="mt-4 text-sm leading-6 text-[#5c675f]">
-              Botanical remedies crafted for daily ritual — teas, oils, and
-              herbal blends delivered with care.
-            </p>
-          </div>
           <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
             {productCategories && productCategories?.length > 0 && (
               <div className="flex flex-col gap-y-2">
@@ -138,11 +126,6 @@ export default async function Footer() {
               </ul>
             </div>
           </div>
-        </div>
-        <div className="flex w-full mb-10 justify-between text-[#7a847c]">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} AureHerb.
-          </Text>
         </div>
       </div>
     </footer>
