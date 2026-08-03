@@ -6,13 +6,31 @@ import Refresh from "@modules/common/icons/refresh"
 
 import Accordion from "./accordion"
 import { HttpTypes } from "@medusajs/types"
+import { getProductContent } from "@lib/product-content/hair-growth-oil"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
 }
 
 const ProductTabs = ({ product }: ProductTabsProps) => {
+  const content = getProductContent({
+    handle: product.handle,
+    id: product.id,
+  })
+
   const tabs = [
+    ...(content
+      ? [
+          {
+            label: "Ingredients",
+            component: <IngredientsTab ingredients={content.ingredients} />,
+          },
+          {
+            label: "Key Benefits",
+            component: <BenefitsTab benefits={content.benefits} />,
+          },
+        ]
+      : []),
     {
       label: "Shipping & Returns",
       component: <ShippingInfoTab />,
@@ -37,39 +55,41 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   )
 }
 
-const ProductInfoTab = ({ product }: ProductTabsProps) => {
+const IngredientsTab = ({
+  ingredients,
+}: {
+  ingredients: Array<{ name: string; detail: string }>
+}) => {
   return (
-    <div className="text-small-regular py-8">
-      <div className="grid grid-cols-2 gap-x-8">
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Material</span>
-            <p>{product.material ? product.material : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Country of origin</span>
-            <p>{product.origin_country ? product.origin_country : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Type</span>
-            <p>{product.type ? product.type.value : "-"}</p>
-          </div>
-        </div>
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Weight</span>
-            <p>{product.weight ? `${product.weight} g` : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Dimensions</span>
-            <p>
-              {product.length && product.width && product.height
-                ? `${product.length}L x ${product.width}W x ${product.height}H`
-                : "-"}
+    <div className="py-6">
+      <ul className="flex flex-col gap-y-5">
+        {ingredients.map((item) => (
+          <li key={item.name}>
+            <p className="text-sm font-semibold text-[#1c2d22]">{item.name}</p>
+            <p className="mt-1 text-sm leading-6 text-[#5c675f]">
+              {item.detail}
             </p>
-          </div>
-        </div>
-      </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+const BenefitsTab = ({ benefits }: { benefits: string[] }) => {
+  return (
+    <div className="py-6">
+      <ul className="flex flex-col gap-y-2.5">
+        {benefits.map((benefit) => (
+          <li
+            key={benefit}
+            className="flex gap-x-2 text-sm leading-6 text-[#5c675f]"
+          >
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#6b7c54]" />
+            <span>{benefit}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -77,7 +97,7 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
 const ShippingInfoTab = () => {
   return (
     <div className="text-small-regular py-8">
-      <div className="grid grid-cols-1 gap-y-8">
+      <div className="flex flex-col gap-y-8">
         <div className="flex items-start gap-x-2">
           <FastDelivery />
           <div>
