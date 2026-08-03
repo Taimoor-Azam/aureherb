@@ -1,8 +1,13 @@
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
-import { clx } from "@modules/common/components/ui"
+import { Text, clx } from "@modules/common/components/ui"
+import Facebook from "@modules/common/icons/facebook"
+import Instagram from "@modules/common/icons/instagram"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+
+const FACEBOOK_URL = "https://www.facebook.com/share/1HPAidoQoY/"
+const INSTAGRAM_URL = "https://www.instagram.com/aureherbofficial"
 
 export default async function Footer() {
   const { collections } = await listCollections({
@@ -125,6 +130,31 @@ export default async function Footer() {
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+        <div className="mb-10 flex w-full flex-col gap-4 xsmall:flex-row xsmall:items-center xsmall:justify-between text-[#7a847c]">
+          <Text className="txt-compact-small">
+            © {new Date().getFullYear()} AureHerb.
+          </Text>
+          <div className="flex items-center gap-4">
+            <a
+              href={FACEBOOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="AureHerb on Facebook"
+              className="text-[#5c675f] transition-colors hover:text-[#1c2d22]"
+            >
+              <Facebook size={20} />
+            </a>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="AureHerb on Instagram"
+              className="text-[#5c675f] transition-colors hover:text-[#1c2d22]"
+            >
+              <Instagram size={20} />
+            </a>
           </div>
         </div>
       </div>
