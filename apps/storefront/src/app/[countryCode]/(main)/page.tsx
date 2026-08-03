@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 
+import About from "@modules/home/components/about"
 import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
 import Testimonials from "@modules/home/components/testimonials"
@@ -42,6 +43,7 @@ export default async function Home(props: {
         </ul>
       </div>
       <Testimonials />
+      <About />
     </>
   )
 }

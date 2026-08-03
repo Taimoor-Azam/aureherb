@@ -1,28 +1,33 @@
 "use client"
 
+import Image from "next/image"
 import { useCallback, useEffect, useState } from "react"
 
 const TESTIMONIALS = [
   {
     name: "Ayesha K.",
+    image: "/testimonials/ayesha.jpg",
     quote:
       "I've used AureHerb Hair Growth Oil for six weeks and my scalp feels calmer. The ritual is simple and the scent is clean — not heavy.",
     rating: 5,
   },
   {
     name: "Sana R.",
+    image: "/testimonials/sana.jpg",
     quote:
       "Finally an oil that doesn't leave my hair greasy. A few drops after washing and it feels softer by the next morning.",
     rating: 5,
   },
   {
     name: "Fatima M.",
+    image: "/testimonials/fatima.jpg",
     quote:
       "I was skeptical, but consistent use made a real difference around my temples. Packaging feels thoughtful too.",
     rating: 4,
   },
   {
     name: "Hira N.",
+    image: "/testimonials/hira.jpg",
     quote:
       "Gentle, botanical, and easy to fit into my Sunday oiling routine. Cash on delivery made trying it easy.",
     rating: 5,
@@ -81,6 +86,16 @@ export default function Testimonials() {
           className="border-t border-[#d7d0c3] pt-6 transition-opacity duration-500"
           aria-live="polite"
         >
+          <div className="mx-auto mb-5 h-24 w-24 overflow-hidden rounded-full border border-[#d7d0c3] ring-2 ring-[#f7f3eb]">
+            <Image
+              src={current.image}
+              alt={current.name}
+              width={96}
+              height={96}
+              className="h-full w-full object-cover"
+              sizes="96px"
+            />
+          </div>
           <Stars rating={current.rating} />
           <blockquote className="mt-4 font-display text-xl small:text-2xl leading-8 text-[#1c2d22]">
             “{current.quote}”
