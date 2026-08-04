@@ -31,6 +31,8 @@ export default async function orderPlacedHandler({
         "email",
         "currency_code",
         "total",
+        "item_subtotal",
+        "shipping_total",
         "items.title",
         "items.quantity",
         "items.unit_price",
@@ -55,6 +57,8 @@ export default async function orderPlacedHandler({
         email: order.email,
         currency_code: order.currency_code,
         total: order.total,
+        item_subtotal: order.item_subtotal,
+        shipping_total: order.shipping_total,
         items: order.items,
         shipping_address: order.shipping_address,
       })

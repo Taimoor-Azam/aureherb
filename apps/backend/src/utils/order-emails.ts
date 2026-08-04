@@ -1,3 +1,5 @@
+import { formatMoney, toAmountNumber } from "./money"
+
 type OrderEmailItem = {
   title?: string | null
   quantity?: number | null
@@ -19,30 +21,15 @@ type OrderEmailAddress = {
 
 export type OrderEmailPayload = {
   id: string
-  display_id?: number | null
+  display_id?: number | string | null
   email?: string | null
   currency_code?: string | null
   total?: number | null
+  item_subtotal?: number | null
+  shipping_total?: number | null
   items?: OrderEmailItem[] | null
   shipping_address?: OrderEmailAddress | null
   tracking_numbers?: string[] | null
-}
-
-function formatMoney(amount: number | null | undefined, currencyCode?: string | null) {
-  if (amount == null || Number.isNaN(amount)) {
-    return "—"
-  }
-  const value = amount / 100
-  const code = (currencyCode || "PKR").toUpperCase()
-  try {
-    return new Intl.NumberFormat("en-PK", {
-      style: "currency",
-      currency: code,
-      maximumFractionDigits: 0,
-    }).format(value)
-  } catch {
-    return `${code} ${value.toFixed(2)}`
-  }
 }
 
 function formatAddress(address?: OrderEmailAddress | null) {
@@ -61,15 +48,20 @@ function formatAddress(address?: OrderEmailAddress | null) {
   return lines.join("<br/>") || "—"
 }
 
-function itemsRows(items: OrderEmailItem[] | null | undefined, currencyCode?: string | null) {
+function itemsRows(
+  items: OrderEmailItem[] | null | undefined,
+  currencyCode?: string | null
+) {
   if (!items?.length) {
     return `<tr><td colspan="3" style="padding:8px;border-bottom:1px solid #eee;">No items</td></tr>`
   }
   return items
     .map((item) => {
       const title = item.title || item.subtitle || "Item"
-      const qty = item.quantity ?? 0
-      const price = formatMoney(item.unit_price, currencyCode)
+      const qty = toAmountNumber(item.quantity) ?? 0
+      const unit = toAmountNumber(item.unit_price)
+      const lineTotal = unit == null ? null : unit * qty
+      const price = formatMoney(lineTotal, currencyCode)
       return `<tr>
         <td style="padding:8px;border-bottom:1px solid #eee;">${title}</td>
         <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${qty}</td>
@@ -77,6 +69,14 @@ function itemsRows(items: OrderEmailItem[] | null | undefined, currencyCode?: st
       </tr>`
     })
     .join("")
+}
+
+function totalsBlock(order: OrderEmailPayload) {
+  return `
+      <p style="margin:12px 0 4px;"><strong>Subtotal:</strong> ${formatMoney(order.item_subtotal, order.currency_code)}</p>
+      <p style="margin:4px 0;"><strong>Shipping:</strong> ${formatMoney(order.shipping_total, order.currency_code)}</p>
+      <p style="margin:4px 0 12px;"><strong>Total:</strong> ${formatMoney(order.total, order.currency_code)}</p>
+  `
 }
 
 function wrapEmail(title: string, bodyHtml: string) {
@@ -130,7 +130,7 @@ export function buildOrderPlacedEmail(order: OrderEmailPayload) {
           ${itemsRows(order.items, order.currency_code)}
         </tbody>
       </table>
-      <p><strong>Total:</strong> ${formatMoney(order.total, order.currency_code)}</p>
+      ${totalsBlock(order)}
       <p><strong>Payment:</strong> Cash on delivery (COD)</p>
       <p><strong>Shipping address:</strong><br/>${formatAddress(order.shipping_address)}</p>
     `
@@ -139,6 +139,8 @@ export function buildOrderPlacedEmail(order: OrderEmailPayload) {
   const text = [
     `AureHerb — Order confirmation`,
     `Order: ${orderLabel}`,
+    `Subtotal: ${formatMoney(order.item_subtotal, order.currency_code)}`,
+    `Shipping: ${formatMoney(order.shipping_total, order.currency_code)}`,
     `Total: ${formatMoney(order.total, order.currency_code)}`,
     `Payment: Cash on delivery (COD)`,
     `Thank you for your order.`,
@@ -154,7 +156,8 @@ export function buildOrderPlacedEmail(order: OrderEmailPayload) {
 export function buildOrderShippedEmail(order: OrderEmailPayload) {
   const orderLabel = order.display_id ? `#${order.display_id}` : order.id
   const tracking =
-    order.tracking_numbers?.filter(Boolean).join(", ") || "Tracking will be shared if available."
+    order.tracking_numbers?.filter(Boolean).join(", ") ||
+    "Tracking will be shared if available."
 
   const html = wrapEmail(
     "Your order has shipped",
@@ -174,6 +177,7 @@ export function buildOrderShippedEmail(order: OrderEmailPayload) {
           ${itemsRows(order.items, order.currency_code)}
         </tbody>
       </table>
+      ${totalsBlock(order)}
       <p><strong>Shipping address:</strong><br/>${formatAddress(order.shipping_address)}</p>
     `
   )
@@ -182,6 +186,9 @@ export function buildOrderShippedEmail(order: OrderEmailPayload) {
     `AureHerb — Your order has shipped`,
     `Order: ${orderLabel}`,
     `Tracking: ${tracking}`,
+    `Subtotal: ${formatMoney(order.item_subtotal, order.currency_code)}`,
+    `Shipping: ${formatMoney(order.shipping_total, order.currency_code)}`,
+    `Total: ${formatMoney(order.total, order.currency_code)}`,
   ].join("\n")
 
   return {

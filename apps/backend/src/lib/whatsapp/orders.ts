@@ -11,6 +11,9 @@ import {
   updateOrderWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { normalizeWhatsAppPhone, phonesMatch } from "./phone"
+import { formatMoney } from "../../utils/money"
+
+export { formatMoney }
 
 export type WhatsAppOrderSummary = {
   id: string
@@ -47,26 +50,6 @@ const ORDER_FIELDS = [
   "region_id",
   "sales_channel_id",
 ] as const
-
-export function formatMoney(
-  amount: number | null | undefined,
-  currencyCode?: string | null
-) {
-  if (amount == null || Number.isNaN(amount)) {
-    return "—"
-  }
-  const value = amount / 100
-  const code = (currencyCode || "PKR").toUpperCase()
-  try {
-    return new Intl.NumberFormat("en-PK", {
-      style: "currency",
-      currency: code,
-      maximumFractionDigits: 0,
-    }).format(value)
-  } catch {
-    return `${code} ${value.toFixed(0)}`
-  }
-}
 
 export async function getOrderById(
   container: MedusaContainer,
