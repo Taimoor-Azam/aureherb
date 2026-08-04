@@ -2,8 +2,10 @@ import { formatMoney, toAmountNumber } from "./money"
 
 type OrderEmailItem = {
   title?: string | null
-  quantity?: number | null
-  unit_price?: number | null
+  quantity?: number | string | null
+  unit_price?: number | string | null
+  total?: number | string | null
+  subtotal?: number | string | null
   subtitle?: string | null
 }
 
@@ -60,7 +62,12 @@ function itemsRows(
       const title = item.title || item.subtitle || "Item"
       const qty = toAmountNumber(item.quantity) ?? 0
       const unit = toAmountNumber(item.unit_price)
-      const lineTotal = unit == null ? null : unit * qty
+      const itemTotal = toAmountNumber(item.total)
+      const itemSubtotal = toAmountNumber(item.subtotal)
+      const lineTotal =
+        itemTotal ??
+        itemSubtotal ??
+        (unit == null ? null : unit * qty)
       const price = formatMoney(lineTotal, currencyCode)
       return `<tr>
         <td style="padding:8px;border-bottom:1px solid #eee;">${title}</td>
