@@ -59,10 +59,31 @@ export async function getOrSetCart(countryCode: string) {
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
 
+  const existingCartId = await getCartId()
   let cart = await retrieveCart(undefined, "id,region_id")
 
   const headers = {
     ...(await getAuthHeaders()),
+  }
+
+  // Cookie exists but retrieve failed — retry uncached before creating a new cart.
+  // Creating a new empty cart here would overwrite a guest cart after login.
+  if (!cart && existingCartId) {
+    cart = await sdk.client
+      .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${existingCartId}`, {
+        method: "GET",
+        query: { fields: "id,region_id" },
+        headers,
+        cache: "no-store",
+      })
+      .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
+      .catch(() => null)
+
+    if (!cart) {
+      throw new Error(
+        "Unable to retrieve your cart. Please refresh the page and try again."
+      )
+    }
   }
 
   if (!cart) {
@@ -112,6 +133,56 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
       return cart
     })
     .catch(medusaError)
+}
+
+/**
+ * When a logged-in customer has a saved in-region address and the cart has none,
+ * apply it so checkout can show the summary + Edit pattern instead of a blank form.
+ */
+export async function ensureCustomerShippingOnCart(
+  cart: HttpTypes.StoreCart,
+  customer: HttpTypes.StoreCustomer | null
+): Promise<HttpTypes.StoreCart> {
+  if (!customer || cart.shipping_address?.address_1) {
+    return cart
+  }
+
+  const countriesInRegion =
+    cart.region?.countries?.map((c) => c.iso_2).filter(Boolean) || []
+  const addressesInRegion = (customer.addresses || []).filter(
+    (a) => a.country_code && countriesInRegion.includes(a.country_code)
+  )
+  const address =
+    addressesInRegion.find((a) => a.is_default_shipping) ||
+    addressesInRegion[0]
+
+  if (!address?.address_1) {
+    return cart
+  }
+
+  const shipping_address = {
+    first_name: address.first_name || customer.first_name || "",
+    last_name: address.last_name || customer.last_name || "",
+    address_1: address.address_1 || "",
+    address_2: address.address_2 || "",
+    company: "",
+    postal_code: address.postal_code || "",
+    city: address.city || "",
+    country_code: address.country_code || "",
+    province: address.province || "",
+    phone: address.phone || customer.phone || "",
+  }
+
+  try {
+    await updateCart({
+      email: customer.email || cart.email,
+      shipping_address,
+      billing_address: shipping_address,
+    })
+    return (await retrieveCart()) || cart
+  } catch {
+    return cart
+  }
 }
 
 export async function addToCart({
@@ -350,7 +421,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         last_name: formData.get("shipping_address.last_name"),
         address_1: formData.get("shipping_address.address_1"),
         address_2: "",
-        company: formData.get("shipping_address.company"),
+        company: "",
         postal_code: formData.get("shipping_address.postal_code"),
         city: formData.get("shipping_address.city"),
         country_code: formData.get("shipping_address.country_code"),
@@ -369,7 +440,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         last_name: formData.get("billing_address.last_name"),
         address_1: formData.get("billing_address.address_1"),
         address_2: "",
-        company: formData.get("billing_address.company"),
+        company: "",
         postal_code: formData.get("billing_address.postal_code"),
         city: formData.get("billing_address.city"),
         country_code: formData.get("billing_address.country_code"),

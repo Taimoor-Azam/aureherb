@@ -78,7 +78,7 @@ export const retrieveCustomer =
       .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
         method: "GET",
         query: {
-          fields: "*orders",
+          fields: "*orders,*addresses",
         },
         headers,
         next,
@@ -177,7 +177,7 @@ export async function loginWithGoogle(): Promise<
     revalidateTag(customerCacheTag)
 
     try {
-      await transferCart()
+      await transferCart(result)
     } catch {
       // Cart transfer is best-effort for an already-authenticated session.
     }
@@ -268,7 +268,7 @@ export async function completeGoogleCallback(
   revalidateTag(customerCacheTag)
 
   try {
-    await transferCart()
+    await transferCart(token)
   } catch {
     // Best-effort: auth already succeeded; don't block sign-in on cart merge.
   }
@@ -366,9 +366,9 @@ async function completeLogin(
   revalidateTag(customerCacheTag)
 
   try {
-    await transferCart()
-  } catch (error) {
-    return { state: "error", error: String(error) }
+    await transferCart(token)
+  } catch {
+    // Best-effort: auth already succeeded; don't block sign-in on cart merge.
   }
 
   return { state: "success" }
@@ -405,14 +405,20 @@ export async function signout(countryCode: string) {
   redirect(`/${countryCode}/account`)
 }
 
-export async function transferCart() {
+export async function transferCart(token?: string) {
   const cartId = await getCartId()
 
   if (!cartId) {
     return
   }
 
-  const headers = await getAuthHeaders()
+  const headers = token
+    ? { authorization: `Bearer ${token}` }
+    : await getAuthHeaders()
+
+  if (!headers || !("authorization" in headers)) {
+    return
+  }
 
   await sdk.store.cart.transferCart(cartId, {}, headers)
 
