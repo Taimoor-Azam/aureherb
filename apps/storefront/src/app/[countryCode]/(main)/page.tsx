@@ -8,9 +8,9 @@ import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
-  title: "AureHerb | Botanical remedies for daily ritual",
+  title: "AureHerb | Botanical hair care online",
   description:
-    "Shop AureHerb herbal teas, wellness blends, essential oils, and dried herbs. Cash on delivery available.",
+    "Shop AureHerb Hair Growth Oil and botanical hair care online. Create an account with email or Google, place cash-on-delivery orders, and track your order.",
 }
 
 export default async function Home(props: {
