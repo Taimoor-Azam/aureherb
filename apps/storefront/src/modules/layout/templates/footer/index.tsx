@@ -11,7 +11,7 @@ export default async function Footer() {
   return (
     <footer className="border-t border-[#d7d0c3] w-full bg-[#f3eee4]">
       <div className="content-container flex flex-col w-full">
-        <div className="flex justify-center py-16 small:py-24">
+        <div className="flex justify-center pt-8 pb-16 small:pb-24">
           <div className="flex flex-col gap-10 xsmall:flex-row xsmall:gap-16 text-small-regular">
             <div className="flex flex-col gap-y-3">
               <span className="txt-small-plus text-[#1c2d22]">Social Media</span>
