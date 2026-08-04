@@ -1,4 +1,5 @@
 import { formatMoney, toAmountNumber } from "./money"
+import { formatOrderReference } from "./order-reference"
 
 type OrderEmailItem = {
   title?: string | null
@@ -118,13 +119,33 @@ function wrapEmail(title: string, bodyHtml: string) {
 </html>`
 }
 
+function getTrackOrderUrl(reference?: string | null) {
+  if (!reference) {
+    return null
+  }
+
+  const storefrontUrl =
+    process.env.STOREFRONT_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "https://aureherb.com"
+
+  return `${storefrontUrl.replace(/\/+$/, "")}/track-order?reference=${encodeURIComponent(reference)}`
+}
+
 export function buildOrderPlacedEmail(order: OrderEmailPayload) {
-  const orderLabel = order.display_id ? `#${order.display_id}` : order.id
+  const orderReference = formatOrderReference(order.display_id)
+  const orderLabel = orderReference || (order.display_id ? `#${order.display_id}` : order.id)
+  const trackOrderUrl = getTrackOrderUrl(orderReference)
   const html = wrapEmail(
     "Order confirmation",
     `
       <p>Thank you for your order. We've received it and will process it shortly.</p>
-      <p><strong>Order:</strong> ${orderLabel}</p>
+      <p><strong>Order reference:</strong> ${orderLabel}</p>
+      ${
+        trackOrderUrl
+          ? `<p><a href="${trackOrderUrl}" style="display:inline-block;padding:10px 18px;background:#1c2d22;color:#ffffff;text-decoration:none;border-radius:999px;">Track your order</a></p>`
+          : ""
+      }
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:16px 0;border-collapse:collapse;">
         <thead>
           <tr>
@@ -145,7 +166,8 @@ export function buildOrderPlacedEmail(order: OrderEmailPayload) {
 
   const text = [
     `AureHerb — Order confirmation`,
-    `Order: ${orderLabel}`,
+    `Order reference: ${orderLabel}`,
+    ...(trackOrderUrl ? [`Track your order: ${trackOrderUrl}`] : []),
     `Subtotal: ${formatMoney(order.item_subtotal, order.currency_code)}`,
     `Shipping: ${formatMoney(order.shipping_total, order.currency_code)}`,
     `Total: ${formatMoney(order.total, order.currency_code)}`,
@@ -161,7 +183,9 @@ export function buildOrderPlacedEmail(order: OrderEmailPayload) {
 }
 
 export function buildOrderShippedEmail(order: OrderEmailPayload) {
-  const orderLabel = order.display_id ? `#${order.display_id}` : order.id
+  const orderReference = formatOrderReference(order.display_id)
+  const orderLabel = orderReference || (order.display_id ? `#${order.display_id}` : order.id)
+  const trackOrderUrl = getTrackOrderUrl(orderReference)
   const tracking =
     order.tracking_numbers?.filter(Boolean).join(", ") ||
     "Tracking will be shared if available."
@@ -170,7 +194,12 @@ export function buildOrderShippedEmail(order: OrderEmailPayload) {
     "Your order has shipped",
     `
       <p>Good news — your AureHerb order is on its way.</p>
-      <p><strong>Order:</strong> ${orderLabel}</p>
+      <p><strong>Order reference:</strong> ${orderLabel}</p>
+      ${
+        trackOrderUrl
+          ? `<p><a href="${trackOrderUrl}" style="display:inline-block;padding:10px 18px;background:#1c2d22;color:#ffffff;text-decoration:none;border-radius:999px;">Track your order</a></p>`
+          : ""
+      }
       <p><strong>Tracking:</strong> ${tracking}</p>
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:16px 0;border-collapse:collapse;">
         <thead>
@@ -191,7 +220,8 @@ export function buildOrderShippedEmail(order: OrderEmailPayload) {
 
   const text = [
     `AureHerb — Your order has shipped`,
-    `Order: ${orderLabel}`,
+    `Order reference: ${orderLabel}`,
+    ...(trackOrderUrl ? [`Track your order: ${trackOrderUrl}`] : []),
     `Tracking: ${tracking}`,
     `Subtotal: ${formatMoney(order.item_subtotal, order.currency_code)}`,
     `Shipping: ${formatMoney(order.shipping_total, order.currency_code)}`,

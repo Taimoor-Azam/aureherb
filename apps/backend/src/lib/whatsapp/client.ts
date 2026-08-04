@@ -1,3 +1,5 @@
+import { formatOrderReference } from "../../utils/order-reference"
+
 type WhatsAppConfig = {
   token: string
   phoneNumberId: string
@@ -156,13 +158,14 @@ export async function sendOrderConfirmPrompt(opts: {
   const useTemplates = process.env.WHATSAPP_USE_TEMPLATES === "true"
   const templateName =
     process.env.WHATSAPP_TEMPLATE_ORDER_CONFIRM || "order_placed_confirm"
+  const orderReference = formatOrderReference(opts.displayId) || String(opts.displayId)
 
   if (useTemplates) {
     try {
       return await sendWhatsAppTemplate({
         to: opts.to,
         name: templateName,
-        bodyParameters: [String(opts.displayId), opts.totalLabel],
+        bodyParameters: [orderReference, opts.totalLabel],
       })
     } catch {
       // fall through to interactive
@@ -171,7 +174,7 @@ export async function sendOrderConfirmPrompt(opts: {
 
   return sendWhatsAppButtons({
     to: opts.to,
-    body: `AureHerb order #${opts.displayId} received (${opts.totalLabel}).\n\nPlease confirm or cancel this order.`,
+    body: `AureHerb order ${orderReference} received (${opts.totalLabel}).\n\nPlease confirm or cancel this order.`,
     buttons: [
       { id: `confirm:${opts.orderId}`, title: "Confirm" },
       { id: `cancel:${opts.orderId}`, title: "Cancel" },
@@ -187,6 +190,7 @@ export async function sendOrderShippedNotice(opts: {
   const useTemplates = process.env.WHATSAPP_USE_TEMPLATES === "true"
   const templateName =
     process.env.WHATSAPP_TEMPLATE_ORDER_SHIPPED || "order_shipped"
+  const orderReference = formatOrderReference(opts.displayId) || String(opts.displayId)
 
   const trackingNote = opts.tracking
     ? ` Tracking: ${opts.tracking}.`
@@ -197,7 +201,7 @@ export async function sendOrderShippedNotice(opts: {
       return await sendWhatsAppTemplate({
         to: opts.to,
         name: templateName,
-        bodyParameters: [String(opts.displayId)],
+        bodyParameters: [orderReference],
       })
     } catch {
       // fall through
@@ -206,6 +210,6 @@ export async function sendOrderShippedNotice(opts: {
 
   return sendWhatsAppText(
     opts.to,
-    `AureHerb update: your order #${opts.displayId} has been given to the courier for delivery.${trackingNote}`
+    `AureHerb update: your order ${orderReference} has been given to the courier for delivery.${trackingNote}`
   )
 }
