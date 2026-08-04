@@ -1,3 +1,4 @@
+import { formatOrderReference } from "@lib/util/order-reference"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@modules/common/components/ui"
 
@@ -12,6 +13,9 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
 
     return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
   }
+
+  const orderReference =
+    formatOrderReference(order.display_id) || `#${order.display_id}`
 
   return (
     <div>
@@ -32,7 +36,8 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
         </span>
       </Text>
       <Text className="mt-2 text-ui-fg-interactive">
-        Order number: <span data-testid="order-id">{order.display_id}</span>
+        Order reference:{" "}
+        <span data-testid="order-id">{orderReference}</span>
       </Text>
 
       <div className="flex items-center text-compact-small gap-x-4 mt-4">

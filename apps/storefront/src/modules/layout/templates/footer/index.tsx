@@ -41,6 +41,14 @@ export default async function Footer() {
               <ul className="grid grid-cols-1 gap-y-2 text-[#5c675f] txt-small">
                 <li>
                   <LocalizedClientLink
+                    href="/track-order"
+                    className="hover:text-[#1c2d22]"
+                  >
+                    Track Your Order
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
                     href="/store"
                     className="hover:text-[#1c2d22]"
                   >

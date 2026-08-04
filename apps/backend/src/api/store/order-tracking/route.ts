@@ -1,15 +1,13 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 
-import { phonesMatch } from "../../../lib/whatsapp/phone"
-import { formatOrderReference, parseOrderReference } from "../../../utils/order-reference"
+import { toAmountNumber } from "../../../utils/money"
+import {
+  formatOrderReference,
+  parseOrderReference,
+} from "../../../utils/order-reference"
 
 type TrackingLookupBody = {
   reference?: string
-  emailOrPhone?: string
-}
-
-function normalizedEmail(value?: string | null) {
-  return value?.trim().toLowerCase() || null
 }
 
 export async function POST(
@@ -17,11 +15,10 @@ export async function POST(
   res: MedusaResponse
 ) {
   const reference = req.body?.reference?.trim()
-  const emailOrPhone = req.body?.emailOrPhone?.trim()
 
-  if (!reference || !emailOrPhone) {
+  if (!reference) {
     return res.status(400).json({
-      message: "Order reference and email or phone are required.",
+      message: "Tracking ID is required.",
     })
   }
 
@@ -29,7 +26,7 @@ export async function POST(
 
   if (!displayId) {
     return res.status(400).json({
-      message: "Invalid order reference.",
+      message: "Invalid tracking ID.",
     })
   }
 
@@ -44,25 +41,14 @@ export async function POST(
       "email",
       "currency_code",
       "status",
-      "summary.*",
+      "total",
       "subtotal",
       "item_subtotal",
       "shipping_total",
-      "total",
-      "items.id",
-      "items.title",
-      "items.quantity",
-      "shipping_address.first_name",
-      "shipping_address.last_name",
-      "shipping_address.address_1",
-      "shipping_address.address_2",
-      "shipping_address.city",
-      "shipping_address.province",
-      "shipping_address.postal_code",
-      "shipping_address.country_code",
-      "shipping_address.phone",
-      "shipping_methods.name",
-      "shipping_methods.total",
+      "items.*",
+      "shipping_methods.*",
+      "summary.*",
+      "shipping_address.*",
     ],
     filters: {
       display_id: String(displayId),
@@ -77,17 +63,7 @@ export async function POST(
     })
   }
 
-  const matchesEmail =
-    normalizedEmail(emailOrPhone) != null &&
-    normalizedEmail(emailOrPhone) === normalizedEmail(order.email)
-
-  const matchesPhone = phonesMatch(emailOrPhone, order.shipping_address?.phone)
-
-  if (!matchesEmail && !matchesPhone) {
-    return res.status(403).json({
-      message: "We could not verify this order with that email or phone.",
-    })
-  }
+  const summary = order.summary || {}
 
   return res.json({
     order: {
@@ -96,18 +72,27 @@ export async function POST(
       created_at: order.created_at,
       email: order.email,
       currency_code: order.currency_code,
-      fulfillment_status: order.summary?.fulfillment_status || order.status || null,
-      payment_status: order.summary?.payment_status || null,
-      subtotal: order.subtotal,
-      item_subtotal: order.item_subtotal,
-      shipping_total: order.shipping_total,
-      total: order.total,
+      fulfillment_status:
+        summary.fulfillment_status || order.status || null,
+      subtotal: toAmountNumber(order.subtotal ?? summary.subtotal),
+      item_subtotal: toAmountNumber(
+        order.item_subtotal ?? summary.item_subtotal ?? order.subtotal
+      ),
+      shipping_total: toAmountNumber(
+        order.shipping_total ?? summary.shipping_total
+      ),
+      total: toAmountNumber(order.total ?? summary.total),
       items: (order.items || [])
         .filter(Boolean)
-        .map((item: { title?: string | null; quantity?: number | null }) => ({
-          title: item.title || "Item",
-          quantity: item.quantity || 0,
-        })),
+        .map(
+          (item: {
+            title?: string | null
+            quantity?: unknown
+          }) => ({
+            title: item.title || "Item",
+            quantity: toAmountNumber(item.quantity) ?? 0,
+          })
+        ),
       shipping_address: order.shipping_address
         ? {
             first_name: order.shipping_address.first_name,
@@ -124,11 +109,14 @@ export async function POST(
       shipping_methods: (order.shipping_methods || [])
         .filter(Boolean)
         .map(
-        (method: { name?: string | null; total?: number | null }) => ({
-          name: method.name || "Shipping",
-          total: method.total || 0,
-        })
-      ),
+          (method: {
+            name?: string | null
+            total?: unknown
+          }) => ({
+            name: method.name || "Shipping",
+            total: toAmountNumber(method.total) ?? 0,
+          })
+        ),
     },
   })
 }

@@ -7,7 +7,6 @@ export type PublicTrackedOrder = {
   email: string
   currency_code: string
   fulfillment_status?: string | null
-  payment_status?: string | null
   subtotal?: number | null
   item_subtotal?: number | null
   shipping_total?: number | null
@@ -37,7 +36,7 @@ type TrackOrderResponse = {
   order: PublicTrackedOrder
 }
 
-export async function trackOrderLookup(reference: string, emailOrPhone: string) {
+export async function trackOrderLookup(reference: string) {
   return sdk.client.fetch<TrackOrderResponse>("/store/order-tracking", {
     method: "POST",
     headers: {
@@ -45,7 +44,6 @@ export async function trackOrderLookup(reference: string, emailOrPhone: string) 
     },
     body: {
       reference,
-      emailOrPhone,
     },
   })
 }

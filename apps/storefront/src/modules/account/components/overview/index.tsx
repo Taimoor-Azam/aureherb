@@ -3,6 +3,7 @@ import { Container } from "@modules/common/components/ui"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
+import { formatOrderReference } from "@lib/util/order-reference"
 import { HttpTypes } from "@medusajs/types"
 
 type OverviewProps = {
@@ -88,7 +89,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                             <div className="grid grid-cols-3 grid-rows-2 text-small-regular gap-x-4 flex-1">
                               <span className="font-semibold">Date placed</span>
                               <span className="font-semibold">
-                                Order number
+                                Order reference
                               </span>
                               <span className="font-semibold">
                                 Total amount
@@ -100,7 +101,8 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                                 data-testid="order-id"
                                 data-value={order.display_id}
                               >
-                                #{order.display_id}
+                                {formatOrderReference(order.display_id) ||
+                                  `#${order.display_id}`}
                               </span>
                               <span data-testid="order-amount">
                                 {convertToLocale({
@@ -114,7 +116,9 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                               data-testid="open-order-button"
                             >
                               <span className="sr-only">
-                                Go to order #{order.display_id}
+                                Go to order{" "}
+                                {formatOrderReference(order.display_id) ||
+                                  `#${order.display_id}`}
                               </span>
                               <ChevronDown className="-rotate-90" />
                             </button>

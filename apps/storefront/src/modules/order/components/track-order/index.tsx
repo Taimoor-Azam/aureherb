@@ -75,9 +75,9 @@ function TrackingResult({ order }: { order: PublicTrackedOrder }) {
 
   return (
     <div className="mt-10 space-y-8 rounded-2xl border border-[#d7d0c3] bg-white p-6 shadow-sm">
-      <div className="grid gap-4 small:grid-cols-2">
+      <div className="grid gap-4 small:grid-cols-3">
         <div>
-          <Text className="text-sm font-medium text-ui-fg-subtle">Order reference</Text>
+          <Text className="text-sm font-medium text-ui-fg-subtle">Tracking ID</Text>
           <Text className="mt-1 text-base font-semibold text-ui-fg-base">{order.reference}</Text>
         </div>
         <div>
@@ -88,12 +88,6 @@ function TrackingResult({ order }: { order: PublicTrackedOrder }) {
           <Text className="text-sm font-medium text-ui-fg-subtle">Order status</Text>
           <Text className="mt-1 text-base text-ui-fg-base">
             {formatStatus(order.fulfillment_status)}
-          </Text>
-        </div>
-        <div>
-          <Text className="text-sm font-medium text-ui-fg-subtle">Payment status</Text>
-          <Text className="mt-1 text-base text-ui-fg-base">
-            {formatStatus(order.payment_status)}
           </Text>
         </div>
       </div>
@@ -168,14 +162,11 @@ type TrackOrderProps = {
 
 export default function TrackOrder({ initialReference = "" }: TrackOrderProps) {
   const [reference, setReference] = useState(initialReference)
-  const [emailOrPhone, setEmailOrPhone] = useState("")
   const [order, setOrder] = useState<PublicTrackedOrder | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const canSubmit = useMemo(() => {
-    return reference.trim().length > 0 && emailOrPhone.trim().length > 0
-  }, [reference, emailOrPhone])
+  const canSubmit = useMemo(() => reference.trim().length > 0, [reference])
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -183,14 +174,14 @@ export default function TrackOrder({ initialReference = "" }: TrackOrderProps) {
     setError(null)
 
     try {
-      const { order } = await trackOrderLookup(reference.trim(), emailOrPhone.trim())
+      const { order } = await trackOrderLookup(reference.trim())
       setOrder(order)
     } catch (err: unknown) {
       setOrder(null)
       setError(
         err instanceof FetchError
           ? err.message
-          : "We could not find a matching order with that reference and contact."
+          : "We could not find an order with that tracking ID."
       )
     } finally {
       setIsLoading(false)
@@ -205,30 +196,21 @@ export default function TrackOrder({ initialReference = "" }: TrackOrderProps) {
             Track your order
           </Heading>
           <Text className="mt-4 text-ui-fg-subtle">
-            Enter your AureHerb order reference and the email or phone used at checkout.
+            Enter the tracking ID from your order confirmation email (for example, AH-000010).
           </Text>
         </div>
 
         <form
           onSubmit={onSubmit}
-          className="mx-auto mt-10 max-w-2xl rounded-2xl border border-[#d7d0c3] bg-white p-6 shadow-sm"
+          className="mx-auto mt-10 max-w-xl rounded-2xl border border-[#d7d0c3] bg-white p-6 shadow-sm"
         >
-          <div className="grid gap-4 small:grid-cols-2">
-            <Input
-              name="reference"
-              label="Order reference"
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              required
-            />
-            <Input
-              name="emailOrPhone"
-              label="Email or phone"
-              value={emailOrPhone}
-              onChange={(e) => setEmailOrPhone(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            name="reference"
+            label="Tracking ID"
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            required
+          />
 
           {error ? <Text className="mt-4 text-sm text-rose-600">{error}</Text> : null}
 

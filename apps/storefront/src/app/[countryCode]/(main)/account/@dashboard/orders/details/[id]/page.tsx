@@ -1,4 +1,5 @@
 import { retrieveOrder } from "@lib/data/orders"
+import { formatOrderReference } from "@lib/util/order-reference"
 import OrderDetailsTemplate from "@modules/order/templates/order-details-template"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
@@ -15,8 +16,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const orderReference =
+    formatOrderReference(order.display_id) || `#${order.display_id}`
+
   return {
-    title: `Order #${order.display_id}`,
+    title: `Order ${orderReference}`,
     description: `View your order`,
   }
 }
