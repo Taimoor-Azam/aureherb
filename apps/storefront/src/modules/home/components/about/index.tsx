@@ -1,5 +1,3 @@
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
-
 export default function About() {
   return (
     <section
@@ -22,11 +20,6 @@ export default function About() {
               hair, and support healthier-looking growth.
             </p>
             <p>
-              On this website you can browse and buy our products, create a
-              customer account with email and password or sign in with Google,
-              place cash-on-delivery orders, and track your order status online.
-            </p>
-            <p>
               At AureHerb, we believe healthy hair begins with healthy roots.
               Our Hair Growth Oil combines time-honored botanical ingredients
               with modern formulation techniques to deliver a premium hair care
@@ -38,23 +31,6 @@ export default function About() {
               complete scalp and hair nourishment.
             </p>
           </div>
-          <p className="mt-8 text-sm text-[#5c675f]">
-            Read our{" "}
-            <LocalizedClientLink
-              href="/content/privacy-policy"
-              className="underline text-[#1c2d22] hover:text-[#1c2d22]/80"
-            >
-              Privacy Policy
-            </LocalizedClientLink>{" "}
-            and{" "}
-            <LocalizedClientLink
-              href="/content/terms-of-use"
-              className="underline text-[#1c2d22] hover:text-[#1c2d22]/80"
-            >
-              Terms of Use
-            </LocalizedClientLink>
-            .
-          </p>
         </div>
       </div>
     </section>
