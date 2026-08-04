@@ -240,9 +240,19 @@ export async function completeGoogleCallback(
     }
 
     try {
-      const refreshed = await sdk.auth.refresh()
-      if (typeof refreshed === "string") {
-        token = refreshed
+      // Pass the callback JWT explicitly — sdk.auth.refresh() can 401 in
+      // server actions when the token isn't attached to the request.
+      const refreshed = await sdk.client.fetch<{ token: string }>(
+        "/auth/token/refresh",
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      if (refreshed?.token) {
+        token = refreshed.token
       }
     } catch (error) {
       return {
@@ -259,11 +269,8 @@ export async function completeGoogleCallback(
 
   try {
     await transferCart()
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    }
+  } catch {
+    // Best-effort: auth already succeeded; don't block sign-in on cart merge.
   }
 
   redirect(`/${countryCode}/account`)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
 
 import { completeGoogleCallback } from "@lib/data/customer"
@@ -11,6 +11,7 @@ export default function GoogleCallbackPage() {
   const searchParams = useSearchParams()
   const { countryCode } = useParams() as { countryCode: string }
   const [error, setError] = useState<string | null>(null)
+  const startedRef = useRef(false)
 
   const queryParams = useMemo(() => {
     const params: Record<string, string> = {}
@@ -21,7 +22,10 @@ export default function GoogleCallbackPage() {
   }, [searchParams])
 
   useEffect(() => {
-    let cancelled = false
+    if (startedRef.current) {
+      return
+    }
+    startedRef.current = true
 
     const run = async () => {
       if (!queryParams.code && !queryParams.state) {
@@ -31,9 +35,6 @@ export default function GoogleCallbackPage() {
 
       try {
         const result = await completeGoogleCallback(queryParams, countryCode)
-        if (cancelled) {
-          return
-        }
         if (!result.success) {
           setError(result.error)
         }
@@ -46,17 +47,11 @@ export default function GoogleCallbackPage() {
         if (digest.startsWith("NEXT_REDIRECT")) {
           return
         }
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : String(err))
-        }
+        setError(err instanceof Error ? err.message : String(err))
       }
     }
 
     run()
-
-    return () => {
-      cancelled = true
-    }
   }, [countryCode, queryParams])
 
   return (
