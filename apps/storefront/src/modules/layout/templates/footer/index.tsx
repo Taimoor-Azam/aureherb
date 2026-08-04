@@ -132,7 +132,7 @@ export default async function Footer() {
             </div>
           </div>
         </div>
-        <div className="mb-10 flex w-full flex-col gap-4 xsmall:flex-row xsmall:items-center xsmall:justify-between text-[#7a847c]">
+        <div className="mb-10 flex w-full flex-col gap-4 small:flex-row small:items-center small:gap-4 text-[#7a847c]">
           <Text className="txt-compact-small">
             © {new Date().getFullYear()} AureHerb.
           </Text>
