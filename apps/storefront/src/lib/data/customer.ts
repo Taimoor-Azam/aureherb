@@ -6,6 +6,7 @@ import { HttpTypes } from "@medusajs/types"
 import { FetchError } from "@medusajs/js-sdk"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
+import { decodeToken } from "react-jwt"
 import {
   getAuthHeaders,
   getCacheOptions,
@@ -24,6 +25,25 @@ export type CustomerAuthState =
   | { state: "verification_required"; email: string }
   | { state: "success" }
   | null
+
+type GoogleAuthTokenPayload = {
+  actor_id?: string
+  user_metadata?: {
+    email?: string
+    given_name?: string
+    family_name?: string
+    name?: string
+  }
+}
+
+function getGoogleCallbackUrl() {
+  const base =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.GOOGLE_CALLBACK_URL?.replace(/\/auth\/google\/callback\/?$/, "") ||
+    "http://localhost:8000"
+
+  return `${base.replace(/\/+$/, "")}/auth/google/callback`
+}
 
 // Requests a verification email for the given customer. The request must be
 // authenticated with a token tied to the auth identity (the token returned by
@@ -132,6 +152,121 @@ export async function login(
   const password = formData.get("password") as string
 
   return completeLogin(email, password)
+}
+
+export async function loginWithGoogle(): Promise<
+  { location: string } | { error: string } | { alreadyAuthenticated: true }
+> {
+  let result: Awaited<ReturnType<typeof sdk.auth.login>>
+
+  try {
+    result = await sdk.auth.login("customer", "google", {
+      callback_url: getGoogleCallbackUrl(),
+    })
+  } catch (error) {
+    return { error: String(error) }
+  }
+
+  if (typeof result === "object" && "location" in result && result.location) {
+    return { location: result.location }
+  }
+
+  if (typeof result === "string") {
+    await setAuthToken(result)
+    const customerCacheTag = await getCacheTag("customers")
+    revalidateTag(customerCacheTag)
+
+    try {
+      await transferCart()
+    } catch {
+      // Cart transfer is best-effort for an already-authenticated session.
+    }
+
+    return { alreadyAuthenticated: true }
+  }
+
+  return { error: "Could not start Google sign-in. Please try again." }
+}
+
+export async function completeGoogleCallback(
+  queryParams: Record<string, string>,
+  countryCode: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  let token: string
+
+  try {
+    token = await sdk.auth.callback("customer", "google", queryParams)
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+
+  const decoded = decodeToken(token) as GoogleAuthTokenPayload | null
+  const shouldCreateCustomer = !decoded?.actor_id
+
+  if (shouldCreateCustomer) {
+    const email = decoded?.user_metadata?.email
+
+    if (!email) {
+      return {
+        success: false,
+        error: "Google did not return an email address for this account.",
+      }
+    }
+
+    try {
+      await sdk.store.customer.create(
+        {
+          email,
+          first_name:
+            decoded?.user_metadata?.given_name ||
+            decoded?.user_metadata?.name?.split(" ")[0],
+          last_name:
+            decoded?.user_metadata?.family_name ||
+            decoded?.user_metadata?.name?.split(" ").slice(1).join(" ") ||
+            undefined,
+        },
+        {},
+        { authorization: `Bearer ${token}` }
+      )
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      // Customer may already exist for this email from a previous Google attempt.
+      if (!message.toLowerCase().includes("already")) {
+        return { success: false, error: message }
+      }
+    }
+
+    try {
+      const refreshed = await sdk.auth.refresh()
+      if (typeof refreshed === "string") {
+        token = refreshed
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
+  }
+
+  await setAuthToken(token)
+
+  const customerCacheTag = await getCacheTag("customers")
+  revalidateTag(customerCacheTag)
+
+  try {
+    await transferCart()
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+
+  redirect(`/${countryCode}/account`)
 }
 
 // Logs the customer in and reconciles the customer record. The behavior is

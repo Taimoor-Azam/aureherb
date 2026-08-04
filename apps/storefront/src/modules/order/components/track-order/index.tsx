@@ -77,7 +77,7 @@ function TrackingResult({ order }: { order: PublicTrackedOrder }) {
     <div className="mt-10 space-y-8 rounded-2xl border border-[#d7d0c3] bg-white p-6 shadow-sm">
       <div className="grid gap-4 small:grid-cols-3">
         <div>
-          <Text className="text-sm font-medium text-ui-fg-subtle">Tracking ID</Text>
+          <Text className="text-sm font-medium text-ui-fg-subtle">Order ID</Text>
           <Text className="mt-1 text-base font-semibold text-ui-fg-base">{order.reference}</Text>
         </div>
         <div>
@@ -181,7 +181,7 @@ export default function TrackOrder({ initialReference = "" }: TrackOrderProps) {
       setError(
         err instanceof FetchError
           ? err.message
-          : "We could not find an order with that tracking ID."
+          : "We could not find an order with that order ID."
       )
     } finally {
       setIsLoading(false)
@@ -196,7 +196,7 @@ export default function TrackOrder({ initialReference = "" }: TrackOrderProps) {
             Track your order
           </Heading>
           <Text className="mt-4 text-ui-fg-subtle">
-            Enter the tracking ID from your order confirmation email (for example, AH-000010).
+            Enter the order ID from your order confirmation email (for example, AH-000010).
           </Text>
         </div>
 
@@ -206,7 +206,7 @@ export default function TrackOrder({ initialReference = "" }: TrackOrderProps) {
         >
           <Input
             name="reference"
-            label="Tracking ID"
+            label="Order ID"
             value={reference}
             onChange={(e) => setReference(e.target.value)}
             required

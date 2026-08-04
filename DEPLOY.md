@@ -40,11 +40,17 @@ Repo: https://github.com/Taimoor-Azam/aureherb
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 JWT_SECRET=<generate-a-long-random-string>
 COOKIE_SECRET=<generate-another-long-random-string>
+AUTH_MFA_ENCRYPTION_KEY=<generate-another-long-random-string>
 STORE_CORS=https://www.aureherb.com,https://aureherb.com
 ADMIN_CORS=https://api.aureherb.com,https://www.aureherb.com
 AUTH_CORS=https://api.aureherb.com,https://www.aureherb.com,https://aureherb.com
 NODE_ENV=production
 MEDUSA_BACKEND_URL=https://api.aureherb.com
+
+# Google customer SSO (OAuth web client — see section below)
+GOOGLE_CLIENT_ID=<google-oauth-client-id>
+GOOGLE_CLIENT_SECRET=<google-oauth-client-secret>
+GOOGLE_CALLBACK_URL=https://www.aureherb.com/auth/google/callback
 
 # Order emails via Resend (HTTPS — works on Railway Hobby; Gmail SMTP is blocked there)
 RESEND_API_KEY=<resend-api-key>
@@ -79,6 +85,27 @@ GEMINI_API_KEY=<google-ai-studio-key>
 6. Optional CORS: origins `https://api.aureherb.com`, `http://localhost:9000`; methods `GET`, `PUT`, `HEAD`.
 
 After R2 is live, re-upload product images in admin (old `/static/` URLs will 404).
+
+### Google customer SSO
+
+Storefront keeps email/password and adds **Continue with Google**.
+
+1. Open [Google Cloud Console](https://console.cloud.google.com/) → create/select a project.
+2. **APIs & Services → OAuth consent screen** → configure for external users (add test users while in Testing).
+3. **Credentials → Create Credentials → OAuth client ID → Web application**.
+4. Authorized JavaScript origins:
+   - `https://www.aureherb.com`
+   - `https://aureherb.com`
+   - `http://localhost:8000` (local)
+5. Authorized redirect URIs:
+   - `https://www.aureherb.com/auth/google/callback`
+   - `http://localhost:8000/auth/google/callback` (local)
+6. Copy Client ID + Client Secret into Railway as `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
+7. Set `GOOGLE_CALLBACK_URL=https://www.aureherb.com/auth/google/callback` on Railway (local: `http://localhost:8000/auth/google/callback`).
+8. Set `AUTH_MFA_ENCRYPTION_KEY` to a long random string (can reuse the same generator as JWT/COOKIE secrets).
+9. Redeploy the backend after adding the variables.
+
+The storefront middleware prepends the country code (`/pk/...`) when Google redirects to the non-country callback URL, so register the URI **without** a country segment.
 
 ### WhatsApp Cloud API bot (free Meta path)
 
@@ -163,6 +190,8 @@ NEXT_PUBLIC_DEFAULT_REGION=pk
 NEXT_PUBLIC_BASE_URL=https://www.aureherb.com
 NODE_ENV=production
 ```
+
+`NEXT_PUBLIC_BASE_URL` is also used to build the Google OAuth callback URL (`/auth/google/callback`) when starting Google sign-in.
 
 Until `api.aureherb.com` DNS works, you can temporarily use the Railway `*.up.railway.app` URL as `NEXT_PUBLIC_MEDUSA_BACKEND_URL`, then update and redeploy.
 

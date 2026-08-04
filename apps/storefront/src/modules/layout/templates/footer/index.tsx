@@ -71,6 +71,22 @@ export default async function Footer() {
                     Account
                   </LocalizedClientLink>
                 </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/content/privacy-policy"
+                    className="hover:text-[#1c2d22]"
+                  >
+                    Privacy Policy
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    href="/content/terms-of-use"
+                    className="hover:text-[#1c2d22]"
+                  >
+                    Terms of Use
+                  </LocalizedClientLink>
+                </li>
               </ul>
             </div>
           </div>

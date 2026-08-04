@@ -3,6 +3,7 @@
 import { useActionState } from "react"
 import Input from "@modules/common/components/input"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
+import GoogleLoginButton from "@modules/account/components/google-login-button"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -27,6 +28,15 @@ const Register = ({ setCurrentView }: Props) => {
         Create your AureHerb member profile, and get access to an enhanced
         shopping experience.
       </p>
+      <GoogleLoginButton />
+      <div className="relative w-full my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-ui-border-base" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-ui-fg-subtle">or</span>
+        </div>
+      </div>
       {message?.state === "verification_required" && (
         <div
           className="w-full mb-4 text-center text-base-regular text-ui-fg-base bg-ui-bg-subtle border border-ui-border-base rounded-rounded p-4"

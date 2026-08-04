@@ -18,7 +18,7 @@ export async function POST(
 
   if (!reference) {
     return res.status(400).json({
-      message: "Tracking ID is required.",
+      message: "Order ID is required.",
     })
   }
 
@@ -26,7 +26,7 @@ export async function POST(
 
   if (!displayId) {
     return res.status(400).json({
-      message: "Invalid tracking ID.",
+      message: "Invalid order ID.",
     })
   }
 
