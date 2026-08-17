@@ -51,6 +51,9 @@ module.exports = defineConfig({
       resolve: "./src/modules/product-review",
     },
     {
+      resolve: "./src/modules/product-cost",
+    },
+    {
       resolve: "@medusajs/medusa/file",
       options: {
         providers: [
