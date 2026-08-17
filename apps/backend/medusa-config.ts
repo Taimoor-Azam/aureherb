@@ -22,12 +22,6 @@ module.exports = defineConfig({
     maxUploadFileSize: 10 * 1024 * 1024,
     disable: process.env.DISABLE_ADMIN === "true",
   },
-  plugins: [
-    {
-      resolve: "@medusajs/draft-order",
-      options: {},
-    },
-  ],
   modules: [
     {
       resolve: "@medusajs/medusa/auth",
@@ -55,9 +49,6 @@ module.exports = defineConfig({
     },
     {
       resolve: "./src/modules/product-review",
-    },
-    {
-      resolve: "./src/modules/product-cost",
     },
     {
       resolve: "@medusajs/medusa/file",
