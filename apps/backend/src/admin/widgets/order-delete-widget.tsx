@@ -8,8 +8,11 @@ const OrderDeleteWidget = ({
   data: order,
 }: DetailWidgetProps<AdminOrder>) => {
   const navigate = useNavigate()
+  const status = String(order.status || "").toLowerCase()
   const isCanceled =
-    order.status === "canceled" || Boolean(order.canceled_at)
+    status === "canceled" ||
+    status === "cancelled" ||
+    Boolean(order.canceled_at)
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -74,7 +77,7 @@ const OrderDeleteWidget = ({
 }
 
 export const config = defineWidgetConfig({
-  zone: "order.details.after",
+  zone: "order.details.side",
 })
 
 export default OrderDeleteWidget
