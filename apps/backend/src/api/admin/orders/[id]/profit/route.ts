@@ -1,8 +1,8 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { PRODUCT_COST_MODULE } from "../../../../modules/product-cost"
-import ProductCostModuleService from "../../../../modules/product-cost/service"
-import { marginPercent, roundMoney } from "../../../../modules/product-cost/utils"
+import { PRODUCT_COST_MODULE } from "../../../../../modules/product-cost"
+import ProductCostModuleService from "../../../../../modules/product-cost/service"
+import { marginPercent, roundMoney } from "../../../../../modules/product-cost/utils"
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const orderId = req.params.id
