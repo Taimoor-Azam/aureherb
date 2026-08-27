@@ -1,0 +1,8 @@
+{
+	email info.aure.herb@gmail.com
+}
+
+api.aureherb.com {
+	encode gzip
+	reverse_proxy backend:9000
+}
