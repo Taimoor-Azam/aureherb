@@ -1,3 +1,19 @@
+/**
+ * Hostinger has no Vercel env. Fill live shop public values when unset.
+ * Dashboard / process env still wins.
+ */
+const PRODUCTION_PUBLIC_ENV = {
+  NEXT_PUBLIC_MEDUSA_BACKEND_URL: "https://api.aureherb.com",
+  NEXT_PUBLIC_DEFAULT_REGION: "pk",
+  NEXT_PUBLIC_BASE_URL: "https://www.aureherb.com",
+}
+
+for (const [key, value] of Object.entries(PRODUCTION_PUBLIC_ENV)) {
+  if (!process.env[key]) {
+    process.env[key] = value
+  }
+}
+
 const checkEnvVariables = require("./check-env-variables")
 
 checkEnvVariables()

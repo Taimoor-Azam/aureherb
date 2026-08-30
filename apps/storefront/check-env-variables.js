@@ -33,6 +33,19 @@ function checkEnvVariables() {
       )
     );
 
+    const onlyPublishableKey = missingEnvs.every(function (env) {
+      return env.key === "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY";
+    });
+
+    if (onlyPublishableKey && process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
+      console.error(
+        c.yellow(
+          "Continuing without a publishable key. Store API calls will fail until NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY is set.\n"
+        )
+      );
+      return;
+    }
+
     process.exit(1);
   }
 }
