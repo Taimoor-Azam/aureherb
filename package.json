@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "pnpm -r --parallel dev",
-    "build": "pnpm -r build",
+    "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",
     "test": "turbo test",
