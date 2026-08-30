@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "pnpm -r --parallel dev",
-    "build": "turbo build",
-    "start": "turbo start",
+    "build": "node scripts/hostinger-cli.js build",
+    "start": "node scripts/hostinger-cli.js start",
     "lint": "turbo lint",
     "test": "turbo test",
     "backend:migrate": "pnpm --filter=@dtc/backend exec medusa db:migrate",
