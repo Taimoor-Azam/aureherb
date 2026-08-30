@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
- * Run Next/Medusa CLIs with `node <file>` so Hostinger does not need
+ * Run the Next.js storefront with `node <file>` so Hostinger does not need
  * executable bits on native binaries (turbo-linux-64 EACCES) or pnpm on PATH.
+ *
+ * Hostinger serves the shop only. Do not run `medusa build` here — that
+ * compiles the admin dashboard, which this host does not start.
  */
 const { spawnSync } = require("node:child_process")
 const { createRequire } = require("node:module")
@@ -28,7 +31,6 @@ function run(pkgDir, moduleId, args) {
 }
 
 if (cmd === "build") {
-  run("apps/backend", "@medusajs/cli/cli.js", ["build"])
   run("apps/storefront", "next/dist/bin/next", ["build"])
 } else if (cmd === "start") {
   const port = process.env.PORT || "8000"

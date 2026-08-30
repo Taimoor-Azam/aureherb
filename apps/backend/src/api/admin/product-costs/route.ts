@@ -135,7 +135,7 @@ export async function PUT(req: MedusaRequest<PutBody>, res: MedusaResponse) {
     existing.map((c: any) => [c.variant_id as string, c])
   )
 
-  const saved = []
+  const saved: Array<Record<string, unknown>> = []
 
   for (const row of costs) {
     if (!row?.variant_id || !allowedVariantIds.has(row.variant_id)) {
