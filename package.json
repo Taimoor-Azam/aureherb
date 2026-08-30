@@ -1,7 +1,7 @@
 {
   "name": "aureherb",
   "private": true,
-  "packageManager": "pnpm@10.11.1",
+  "packageManager": "pnpm@11.24.0",
   "engines": {
     "node": ">=20"
   },
@@ -16,12 +16,6 @@
     "backend:user": "pnpm --filter=@dtc/backend exec medusa user -e admin@aureherb.local -p supersecret",
     "backend:dev": "pnpm --filter=@dtc/backend dev",
     "storefront:dev": "pnpm --filter=@dtc/storefront dev"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.0.5",
-      "@types/react-dom": "19.0.5"
-    }
   },
   "devDependencies": {
     "@medusajs/eslint-plugin": "2.16.0",
