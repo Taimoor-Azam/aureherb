@@ -71,6 +71,20 @@ add_action('woocommerce_after_add_to_cart_button', function () {
     echo '<p class="cod-note">Cash on delivery available in Pakistan. Shipping Rs 249, free on orders Rs 3,000+.</p>';
 });
 
+add_filter('woocommerce_default_address_fields', function ($fields) {
+    if (isset($fields['postcode'])) {
+        $fields['postcode']['required'] = false;
+        $fields['postcode']['hidden'] = true;
+    }
+    return $fields;
+});
+
+add_filter('woocommerce_checkout_fields', function ($fields) {
+    unset($fields['billing']['billing_postcode']);
+    unset($fields['shipping']['shipping_postcode']);
+    return $fields;
+});
+
 function aureherb_cart_count()
 {
     if (!function_exists('WC') || !WC()->cart) {
