@@ -1,5 +1,29 @@
 # Deploy AureHerb (www.aureherb.com)
 
+**This `woocommerce` branch:** live shop is **WordPress + WooCommerce on Hostinger**. Theme: [`wordpress/aureherb/`](wordpress/aureherb/). No Railway, no Medusa API, no `next build`.
+
+| Service | URL |
+|---------|-----|
+| Shop | https://www.aureherb.com |
+| Apex | https://aureherb.com → redirect to www |
+
+## WooCommerce on Hostinger
+
+1. hPanel → **WordPress** Auto Installer for `aureherb.com` (not the Node.js GitHub builder).
+2. Install the **WooCommerce** plugin.
+3. Upload [`wordpress/aureherb/`](wordpress/aureherb/) to `wp-content/themes/aureherb` and activate **AureHerb**.
+4. WooCommerce → Settings: PKR, Pakistan, **Cash on delivery**, shipping Rs 249 / free at Rs 3,000.
+5. Add **Hair Growth Oil** (and images). Create Privacy Policy, Terms of Use, and a Track Order page with `[woocommerce_order_tracking]`.
+6. Point `@` / `www` at WordPress. Stop Hostinger Node.js deploys of this repo. Stop Railway when you no longer need Medusa admin; remove the `api` CNAME.
+
+Full steps: [`wordpress/aureherb/README.md`](wordpress/aureherb/README.md).
+
+The remainder of this file is the **previous** Medusa + Railway + Vercel stack, still used on `master`.
+
+---
+
+# Previous stack (master): Hostinger DNS + Railway + Vercel
+
 Stack: **Hostinger Premium** (domain/DNS) + **Railway** (Medusa + Postgres) + **Vercel** (storefront).
 
 Target URLs:
