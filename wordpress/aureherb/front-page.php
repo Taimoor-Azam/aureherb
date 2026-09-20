@@ -74,7 +74,7 @@ $testimonials = [
         <?php foreach ($products as $product) : ?>
           <li class="product-card">
             <a href="<?php echo esc_url($product->get_permalink()); ?>">
-              <?php echo $product->get_image('woocommerce_thumbnail'); ?>
+              <?php echo $product->get_image('woocommerce_single'); ?>
               <div class="product-card-body">
                 <h3><?php echo esc_html($product->get_name()); ?></h3>
                 <p class="price"><?php echo wp_kses_post($product->get_price_html()); ?></p>
