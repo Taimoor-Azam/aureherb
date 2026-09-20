@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AUREHERB_VERSION', '1.0.0');
+define('AUREHERB_VERSION', '1.0.12');
 
 function aureherb_asset($path)
 {
