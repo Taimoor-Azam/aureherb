@@ -121,4 +121,18 @@ $testimonials = [
 </section>
 
 <?php
+// SEO/AEO body content from the Home page (plugin or editor), when present.
+while (have_posts()) {
+    the_post();
+    $seo_body = trim((string) get_the_content());
+    if ($seo_body !== '') {
+        echo '<section class="section content-container legal seo-home-content" aria-label="' . esc_attr__('More about AureHerb', 'aureherb') . '">';
+        echo '<div class="seo-home-inner">';
+        the_content();
+        echo '</div></section>';
+    }
+}
+?>
+
+<?php
 get_footer();

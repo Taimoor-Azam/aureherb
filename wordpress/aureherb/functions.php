@@ -7,9 +7,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AUREHERB_VERSION', '1.0.13');
-define('AUREHERB_SHIPPING_FLAT', 249);
-define('AUREHERB_FREE_SHIPPING_MIN', 3000);
+define('AUREHERB_VERSION', '1.0.14');
+define('AUREHERB_SHIPPING_FLAT', 0);
+define('AUREHERB_FREE_SHIPPING_MIN', 0);
 
 function aureherb_asset($path)
 {
@@ -139,7 +139,7 @@ add_action('after_switch_theme', function () {
 
 /** Buy now label on single product. */
 add_filter('woocommerce_product_single_add_to_cart_text', function ($text) {
-    return __('Buy now — Cash on delivery', 'aureherb');
+    return __('Buy Now', 'aureherb');
 });
 
 /** Skip cart: go straight to checkout after add to cart. */
@@ -362,11 +362,29 @@ add_action('woocommerce_after_checkout_validation', function ($data, $errors) {
 
 /** Trust line above Place order. */
 add_action('woocommerce_review_order_before_submit', function () {
-    echo '<p class="checkout-trust-note">' . esc_html__('Pay when the parcel arrives · Shipping already included in the total above.', 'aureherb') . '</p>';
+    echo '<p class="checkout-trust-note">' . esc_html__('Pay when the parcel arrives · Free shipping on COD.', 'aureherb') . '</p>';
 });
 
 /** Prefer guest checkout — no account nudge. */
 add_filter('woocommerce_enable_order_notes_field', '__return_false');
+
+/**
+ * Keep Track Order working even if the page body is emptied.
+ * WooCommerce guest tracking: order ID + billing email.
+ */
+add_filter('the_content', function ($content) {
+    if (is_admin() || !is_page()) {
+        return $content;
+    }
+    if (!is_page('track-order')) {
+        return $content;
+    }
+    if (strpos($content, 'woocommerce_order_tracking') !== false || strpos($content, 'track_order') !== false) {
+        return $content;
+    }
+    $intro = '<p>' . esc_html__('Enter your order number and the email or phone used at checkout to see status.', 'aureherb') . '</p>';
+    return $intro . do_shortcode('[woocommerce_order_tracking]');
+}, 20);
 
 function aureherb_cart_count()
 {
