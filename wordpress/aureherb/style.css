@@ -3,7 +3,7 @@ Theme Name: AureHerb
 Theme URI: https://www.aureherb.com
 Author: AureHerb
 Description: WooCommerce theme matching the AureHerb Next.js shop — herb sand palette, Fraunces display type, hero oiling video, COD-ready.
-Version: 1.0.16
+Version: 1.0.17
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.0
@@ -626,23 +626,34 @@ a.button,
     linear-gradient(180deg, var(--herb-sand) 0%, var(--herb-footer) 100%);
 }
 
+.bundle-offer .section-title {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+}
+
 .bundle-offer-inner {
   text-align: center;
   max-width: 36rem;
+  font-family: var(--font-sans);
 }
 
 .bundle-offer-lead {
-  margin: 0.25rem 0 1.25rem;
-  font-family: var(--font-display);
-  font-size: clamp(1.25rem, 3vw, 1.65rem);
-  color: var(--herb-ink);
+  margin: 0.75rem 0 1.25rem;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
   font-weight: 600;
+  color: var(--herb-leaf);
+  letter-spacing: normal;
 }
 
 .bundle-offer-was {
   display: inline-block;
   margin-left: 0.45rem;
-  font-size: 0.85em;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--herb-mist);
   text-decoration: line-through;
@@ -668,6 +679,7 @@ a.button,
 .bundle-offer-cta {
   display: inline-block;
   min-width: min(100%, 18rem);
+  font-family: var(--font-sans);
 }
 
 .bundle-offer-pdp-banner {
@@ -678,10 +690,12 @@ a.button,
 .bundle-offer-strip {
   width: 100%;
   margin: 0 0 1rem;
+  font-family: var(--font-sans);
 }
 
 .bundle-offer-strip-label {
   margin: 0 0 0.55rem;
+  font-family: var(--font-sans);
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--herb-ink);
@@ -705,7 +719,9 @@ a.button,
   color: var(--herb-ink);
   text-align: left;
   cursor: pointer;
-  font: inherit;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.35;
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
@@ -727,6 +743,7 @@ a.button,
   position: absolute;
   top: 0.45rem;
   right: 0.45rem;
+  font-family: var(--font-sans);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -735,12 +752,13 @@ a.button,
 }
 
 .bundle-offer-option-title {
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.95rem;
 }
 
 .bundle-offer-option-price {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--herb-leaf);
@@ -748,6 +766,7 @@ a.button,
 
 .bundle-offer-option-was {
   margin-left: 0.35rem;
+  font-family: var(--font-sans);
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--herb-mist);

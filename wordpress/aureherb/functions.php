@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AUREHERB_VERSION', '1.0.16');
+define('AUREHERB_VERSION', '1.0.17');
 define('AUREHERB_SHIPPING_FLAT', 0);
 define('AUREHERB_FREE_SHIPPING_MIN', 0);
 define('AUREHERB_BUNDLE_SLUG', 'hair-growth-oil');
