@@ -3,7 +3,7 @@ Theme Name: AureHerb
 Theme URI: https://www.aureherb.com
 Author: AureHerb
 Description: WooCommerce theme matching the AureHerb Next.js shop — herb sand palette, Fraunces display type, hero oiling video, COD-ready.
-Version: 1.0.14
+Version: 1.0.15
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.0
@@ -623,6 +623,14 @@ a.button,
   margin: 0 0 1rem;
   color: var(--herb-mist);
   font-size: 0.9rem;
+}
+
+/* Pakistan-only checkout: keep country in DOM for province JS, hide from shoppers. */
+.woocommerce-checkout .aureherb-hidden-country,
+.woocommerce-checkout #billing_country_field.aureherb-hidden-country,
+.woocommerce-checkout .woocommerce-shipping-fields,
+.woocommerce-checkout #ship-to-different-address {
+  display: none !important;
 }
 
 .buy-now-bar {
