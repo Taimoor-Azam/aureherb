@@ -144,7 +144,28 @@ add_filter('woocommerce_customer_default_location', function () {
     return 'PK';
 });
 add_filter('woocommerce_ship_to_billing_address_only', '__return_true');
-add_filter('woocommerce_cart_needs_shipping_address', '__return_false');
+
+/** Force phone required even when WC locale JS / store settings mark it optional. */
+add_filter('pre_option_woocommerce_checkout_phone_field', function () {
+    return 'required';
+});
+add_filter('woocommerce_get_country_locale', function ($locale) {
+    foreach (array_keys($locale) as $country) {
+        if (!isset($locale[$country]) || !is_array($locale[$country])) {
+            continue;
+        }
+        $locale[$country]['phone'] = array_merge($locale[$country]['phone'] ?? [], [
+            'required' => true,
+            'hidden' => false,
+        ]);
+    }
+    $locale['default'] = array_merge($locale['default'] ?? [], []);
+    $locale['default']['phone'] = array_merge($locale['default']['phone'] ?? [], [
+        'required' => true,
+        'hidden' => false,
+    ]);
+    return $locale;
+}, 20);
 
 /** Prefer the single available rate (free delivery) when Woo has not chosen one yet. */
 add_filter('woocommerce_shipping_chosen_method', function ($method, $available_methods, $package = []) {
