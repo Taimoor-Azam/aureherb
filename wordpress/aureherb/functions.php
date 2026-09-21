@@ -85,6 +85,44 @@ add_filter('woocommerce_enqueue_styles', function ($styles) {
     return $styles;
 });
 
+/**
+ * Block checkout ignores classic field filters. Render classic shortcode instead
+ * so slim COD fields + trust note work, while keeping sibling page content
+ * (e.g. Google sign-in) intact.
+ */
+add_filter('render_block', function ($block_content, $block) {
+    if (($block['blockName'] ?? '') !== 'woocommerce/checkout') {
+        return $block_content;
+    }
+    if (!function_exists('is_checkout') || !is_checkout()) {
+        return $block_content;
+    }
+    return do_shortcode('[woocommerce_checkout]');
+}, 10, 2);
+
+/** Hide optional address fields for Pakistan in locale (blocks + classic). */
+add_filter('woocommerce_get_country_locale', function ($locale) {
+    $hide = ['required' => false, 'hidden' => true];
+    foreach (['default', 'PK'] as $key) {
+        if (!isset($locale[$key]) || !is_array($locale[$key])) {
+            $locale[$key] = [];
+        }
+        foreach (['postcode', 'state', 'company', 'address_2', 'last_name'] as $field) {
+            $locale[$key][$field] = array_merge($locale[$key][$field] ?? [], $hide);
+        }
+        $locale[$key]['first_name'] = array_merge($locale[$key]['first_name'] ?? [], [
+            'label' => __('Full name', 'aureherb'),
+            'required' => true,
+        ]);
+        $locale[$key]['city'] = array_merge($locale[$key]['city'] ?? [], ['required' => true]);
+        $locale[$key]['address_1'] = array_merge($locale[$key]['address_1'] ?? [], [
+            'label' => __('Address', 'aureherb'),
+            'required' => true,
+        ]);
+    }
+    return $locale;
+});
+
 add_action('after_switch_theme', function () {
     if (get_option('aureherb_setup_done')) {
         return;
