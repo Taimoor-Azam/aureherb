@@ -7,13 +7,76 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AUREHERB_VERSION', '1.0.15');
+define('AUREHERB_VERSION', '1.0.16');
 define('AUREHERB_SHIPPING_FLAT', 0);
 define('AUREHERB_FREE_SHIPPING_MIN', 0);
+define('AUREHERB_BUNDLE_SLUG', 'hair-growth-oil');
+define('AUREHERB_BUNDLE_PAIR_QTY', 2);
+define('AUREHERB_BUNDLE_PAIR_PRICE', 2499);
+define('AUREHERB_BUNDLE_PAIR_SAVE', 499);
 
 function aureherb_asset($path)
 {
     return get_template_directory_uri() . '/assets/' . ltrim($path, '/');
+}
+
+/**
+ * Flagship product used for the Buy-2 bundle offer.
+ */
+function aureherb_bundle_product()
+{
+    static $product = null;
+    static $loaded = false;
+    if ($loaded) {
+        return $product;
+    }
+    $loaded = true;
+    if (!function_exists('wc_get_product')) {
+        return null;
+    }
+    $posts = get_posts([
+        'name' => AUREHERB_BUNDLE_SLUG,
+        'post_type' => 'product',
+        'post_status' => 'publish',
+        'numberposts' => 1,
+    ]);
+    if (!$posts) {
+        return null;
+    }
+    $product = wc_get_product($posts[0]->ID);
+    return $product instanceof WC_Product ? $product : null;
+}
+
+function aureherb_is_bundle_product($product)
+{
+    return $product && is_object($product) && method_exists($product, 'get_slug')
+        && $product->get_slug() === AUREHERB_BUNDLE_SLUG;
+}
+
+/**
+ * Bundle discount for a quantity (Rs 499 off per complete pair).
+ */
+function aureherb_bundle_discount_for_qty($qty)
+{
+    $qty = max(0, (int) $qty);
+    return (int) floor($qty / AUREHERB_BUNDLE_PAIR_QTY) * AUREHERB_BUNDLE_PAIR_SAVE;
+}
+
+/**
+ * Payable total for qty of a product (price − bundle discount + shipping).
+ */
+function aureherb_product_qty_total($product = null, $qty = 1)
+{
+    $qty = max(1, (int) $qty);
+    $price = 0.0;
+    if ($product && is_object($product) && method_exists($product, 'get_price')) {
+        $price = (float) $product->get_price();
+    }
+    $subtotal = $price * $qty;
+    if (aureherb_is_bundle_product($product)) {
+        $subtotal -= aureherb_bundle_discount_for_qty($qty);
+    }
+    return (int) round($subtotal + aureherb_product_shipping_amount($product));
 }
 
 /**
@@ -78,6 +141,13 @@ add_action('wp_enqueue_scripts', function () {
     }
     if (function_exists('is_product') && is_product()) {
         wp_enqueue_script('aureherb-buy-now-bar', aureherb_asset('js/buy-now-bar.js'), [], AUREHERB_VERSION, true);
+        wp_enqueue_script(
+            'aureherb-bundle-offer',
+            aureherb_asset('js/bundle-offer.js'),
+            [],
+            AUREHERB_VERSION,
+            true
+        );
     }
 });
 
@@ -255,6 +325,77 @@ add_filter('woocommerce_add_to_cart_redirect', function ($url) {
     return $url;
 });
 
+/**
+ * Apply Rs 499 off per complete pair of Hair Growth Oil in the cart.
+ */
+add_action('woocommerce_cart_calculate_fees', function ($cart) {
+    if (!is_object($cart) || (is_admin() && !defined('DOING_AJAX'))) {
+        return;
+    }
+    $qty = 0;
+    foreach ($cart->get_cart() as $item) {
+        $product = isset($item['data']) ? $item['data'] : null;
+        if (aureherb_is_bundle_product($product)) {
+            $qty += (int) $item['quantity'];
+        }
+    }
+    $discount = aureherb_bundle_discount_for_qty($qty);
+    if ($discount <= 0) {
+        return;
+    }
+    $cart->add_fee(__('Bundle offer', 'aureherb'), -1 * $discount, false);
+});
+
+/** Bundle banner on PDP (Hair Growth Oil only). */
+add_action('woocommerce_before_add_to_cart_form', function () {
+    global $product;
+    if (!aureherb_is_bundle_product($product)) {
+        return;
+    }
+    $banner = aureherb_asset('images/aureherb-bundle-offer.jpg');
+    ?>
+    <div class="bundle-offer-pdp-banner" data-bundle-banner>
+      <img
+        src="<?php echo esc_url($banner); ?>"
+        alt="<?php esc_attr_e('Bundle offer — Buy 2 bottles for Rs 2,499', 'aureherb'); ?>"
+        width="1122"
+        height="1402"
+        loading="lazy"
+      >
+    </div>
+    <?php
+});
+
+add_action('woocommerce_before_add_to_cart_button', function () {
+    global $product;
+    if (!aureherb_is_bundle_product($product)) {
+        return;
+    }
+    $unit = (int) round((float) $product->get_price());
+    $bundle = (int) AUREHERB_BUNDLE_PAIR_PRICE;
+    $was = $unit * AUREHERB_BUNDLE_PAIR_QTY;
+    $default_qty = isset($_GET['bundle']) && (string) $_GET['bundle'] === '2' ? 2 : 1;
+    ?>
+    <div class="bundle-offer-strip" data-bundle-offer data-unit-price="<?php echo esc_attr((string) $unit); ?>" data-bundle-price="<?php echo esc_attr((string) $bundle); ?>" data-bundle-save="<?php echo esc_attr((string) AUREHERB_BUNDLE_PAIR_SAVE); ?>">
+      <p class="bundle-offer-strip-label"><?php esc_html_e('Choose your offer', 'aureherb'); ?></p>
+      <div class="bundle-offer-options" role="group" aria-label="<?php esc_attr_e('Bottle quantity offer', 'aureherb'); ?>">
+        <button type="button" class="bundle-offer-option<?php echo $default_qty === 1 ? ' is-active' : ''; ?>" data-bundle-qty="1" aria-pressed="<?php echo $default_qty === 1 ? 'true' : 'false'; ?>">
+          <span class="bundle-offer-option-title"><?php esc_html_e('1 bottle', 'aureherb'); ?></span>
+          <span class="bundle-offer-option-price"><?php echo esc_html(sprintf(__('Rs %s', 'aureherb'), number_format_i18n($unit, 0))); ?></span>
+        </button>
+        <button type="button" class="bundle-offer-option bundle-offer-option--deal<?php echo $default_qty === 2 ? ' is-active' : ''; ?>" data-bundle-qty="2" aria-pressed="<?php echo $default_qty === 2 ? 'true' : 'false'; ?>">
+          <span class="bundle-offer-option-badge"><?php esc_html_e('Best value', 'aureherb'); ?></span>
+          <span class="bundle-offer-option-title"><?php esc_html_e('2 bottles', 'aureherb'); ?></span>
+          <span class="bundle-offer-option-price">
+            <?php echo esc_html(sprintf(__('Rs %s', 'aureherb'), number_format_i18n($bundle, 0))); ?>
+            <span class="bundle-offer-option-was"><?php echo esc_html(sprintf(__('Rs %s', 'aureherb'), number_format_i18n($was, 0))); ?></span>
+          </span>
+        </button>
+      </div>
+    </div>
+    <?php
+});
+
 /** Delivered total + COD copy under Buy now. */
 add_action('woocommerce_after_add_to_cart_button', function () {
     global $product;
@@ -264,13 +405,24 @@ add_action('woocommerce_after_add_to_cart_button', function () {
 
     $price = (float) $product->get_price();
     $shipping = aureherb_product_shipping_amount($product);
-    $total = aureherb_product_delivered_total($product);
+    $default_qty = aureherb_is_bundle_product($product) && isset($_GET['bundle']) && (string) $_GET['bundle'] === '2'
+        ? 2
+        : 1;
+    $total = aureherb_product_qty_total($product, $default_qty);
     $price_fmt = number_format_i18n($price, 0);
     $ship_fmt = number_format_i18n($shipping, 0);
     $total_fmt = number_format_i18n($total, 0);
+    $unit = (int) round($price);
+    $bundle = (int) AUREHERB_BUNDLE_PAIR_PRICE;
     ?>
-    <div class="delivered-total" data-delivered-total>
-      <p class="delivered-total-main">
+    <div
+      class="delivered-total"
+      data-delivered-total
+      data-unit-price="<?php echo esc_attr((string) $unit); ?>"
+      data-bundle-price="<?php echo esc_attr((string) $bundle); ?>"
+      data-bundle-enabled="<?php echo aureherb_is_bundle_product($product) ? '1' : '0'; ?>"
+    >
+      <p class="delivered-total-main" data-delivered-main>
         <?php
         echo esc_html(
             sprintf(
@@ -281,9 +433,11 @@ add_action('woocommerce_after_add_to_cart_button', function () {
         );
         ?>
       </p>
-      <p class="delivered-total-sub">
+      <p class="delivered-total-sub" data-delivered-sub>
         <?php
-        if ($shipping > 0) {
+        if ($default_qty >= 2 && aureherb_is_bundle_product($product)) {
+            echo esc_html__('Bundle of 2 · Free shipping · Pay on delivery', 'aureherb');
+        } elseif ($shipping > 0) {
             echo esc_html(
                 sprintf(
                     /* translators: 1: product price 2: shipping amount */
@@ -314,11 +468,14 @@ add_action('wp_footer', function () {
         return;
     }
 
-    $total_fmt = number_format_i18n(aureherb_product_delivered_total($product), 0);
+    $default_qty = aureherb_is_bundle_product($product) && isset($_GET['bundle']) && (string) $_GET['bundle'] === '2'
+        ? 2
+        : 1;
+    $total_fmt = number_format_i18n(aureherb_product_qty_total($product, $default_qty), 0);
     ?>
     <div class="buy-now-bar" data-buy-now-bar hidden>
       <div class="buy-now-bar-inner">
-        <p class="buy-now-bar-price">
+        <p class="buy-now-bar-price" data-buy-now-bar-price>
           <?php
           echo esc_html(
               sprintf(
@@ -336,6 +493,17 @@ add_action('wp_footer', function () {
     </div>
     <?php
 });
+
+/** Prefill qty=2 when landing with ?bundle=2. */
+add_filter('woocommerce_quantity_input_args', function ($args, $product) {
+    if (!aureherb_is_bundle_product($product)) {
+        return $args;
+    }
+    if (isset($_GET['bundle']) && (string) $_GET['bundle'] === '2') {
+        $args['input_value'] = 2;
+    }
+    return $args;
+}, 10, 2);
 
 add_filter('woocommerce_default_address_fields', function ($fields) {
     if (isset($fields['postcode'])) {

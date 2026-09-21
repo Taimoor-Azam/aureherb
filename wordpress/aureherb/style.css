@@ -3,7 +3,7 @@ Theme Name: AureHerb
 Theme URI: https://www.aureherb.com
 Author: AureHerb
 Description: WooCommerce theme matching the AureHerb Next.js shop — herb sand palette, Fraunces display type, hero oiling video, COD-ready.
-Version: 1.0.15
+Version: 1.0.16
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.0
@@ -617,6 +617,147 @@ a.button,
   margin: 0.35rem 0 0;
   color: var(--herb-mist);
   font-size: 0.9rem;
+}
+
+/* Homepage + PDP Buy-2 bundle offer */
+.bundle-offer {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(107, 143, 113, 0.12), transparent 70%),
+    linear-gradient(180deg, var(--herb-sand) 0%, var(--herb-footer) 100%);
+}
+
+.bundle-offer-inner {
+  text-align: center;
+  max-width: 36rem;
+}
+
+.bundle-offer-lead {
+  margin: 0.25rem 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  color: var(--herb-ink);
+  font-weight: 600;
+}
+
+.bundle-offer-was {
+  display: inline-block;
+  margin-left: 0.45rem;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--herb-mist);
+  text-decoration: line-through;
+}
+
+.bundle-offer-media {
+  display: block;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.bundle-offer-media img,
+.bundle-offer-pdp-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bundle-offer-actions {
+  margin: 1.25rem 0 0;
+}
+
+.bundle-offer-cta {
+  display: inline-block;
+  min-width: min(100%, 18rem);
+}
+
+.bundle-offer-pdp-banner {
+  margin: 0 0 1.25rem;
+  overflow: hidden;
+}
+
+.bundle-offer-strip {
+  width: 100%;
+  margin: 0 0 1rem;
+}
+
+.bundle-offer-strip-label {
+  margin: 0 0 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--herb-ink);
+}
+
+.bundle-offer-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.bundle-offer-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--herb-clay);
+  background: #fff;
+  color: var(--herb-ink);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.bundle-offer-option:hover {
+  border-color: var(--herb-moss);
+}
+
+.bundle-offer-option.is-active {
+  border-color: var(--herb-leaf);
+  background: rgba(47, 74, 56, 0.06);
+  box-shadow: inset 0 0 0 1px var(--herb-leaf);
+}
+
+.bundle-offer-option--deal.is-active {
+  background: rgba(196, 163, 90, 0.12);
+}
+
+.bundle-offer-option-badge {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--herb-leaf);
+}
+
+.bundle-offer-option-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.bundle-offer-option-price {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--herb-leaf);
+}
+
+.bundle-offer-option-was {
+  margin-left: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--herb-mist);
+  text-decoration: line-through;
+}
+
+@media (max-width: 480px) {
+  .bundle-offer-options {
+    grid-template-columns: 1fr;
+  }
 }
 
 .checkout-trust-note {

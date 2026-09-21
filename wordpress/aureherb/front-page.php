@@ -87,6 +87,69 @@ $testimonials = [
   <?php endif; ?>
 <?php endif; ?>
 
+<?php
+$bundle_product = function_exists('aureherb_bundle_product') ? aureherb_bundle_product() : null;
+$bundle_banner = aureherb_asset('images/aureherb-bundle-offer.jpg');
+$bundle_cta = $bundle_product
+    ? add_query_arg(
+        [
+            'add-to-cart' => $bundle_product->get_id(),
+            'quantity' => 2,
+        ],
+        home_url('/')
+    )
+    : home_url('/product/hair-growth-oil/?bundle=2');
+?>
+<section class="bundle-offer section" aria-labelledby="bundle-offer-heading">
+  <div class="content-container bundle-offer-inner">
+    <h2 id="bundle-offer-heading" class="section-title"><?php esc_html_e('Bundle offer', 'aureherb'); ?></h2>
+    <p class="bundle-offer-lead">
+      <?php
+      echo esc_html(
+          sprintf(
+              /* translators: 1: bundle price 2: regular two-bottle price */
+              __('Buy 2 for Rs %1$s', 'aureherb'),
+              number_format_i18n(AUREHERB_BUNDLE_PAIR_PRICE, 0)
+          )
+      );
+      ?>
+      <span class="bundle-offer-was">
+        <?php
+        echo esc_html(
+            sprintf(
+                /* translators: %s: crossed-out two-bottle price */
+                __('Rs %s', 'aureherb'),
+                number_format_i18n(1499 * 2, 0)
+            )
+        );
+        ?>
+      </span>
+    </p>
+    <a class="bundle-offer-media" href="<?php echo esc_url($bundle_cta); ?>">
+      <img
+        src="<?php echo esc_url($bundle_banner); ?>"
+        alt="<?php esc_attr_e('AureHerb bundle offer — Buy 2 bottles and grow healthier hair', 'aureherb'); ?>"
+        width="1122"
+        height="1402"
+        loading="lazy"
+      >
+    </a>
+    <p class="bundle-offer-actions">
+      <a class="button bundle-offer-cta" href="<?php echo esc_url($bundle_cta); ?>">
+        <?php
+        echo esc_html(
+            sprintf(
+                /* translators: %s: bundle price */
+                __('Buy 2 bottles — Rs %s', 'aureherb'),
+                number_format_i18n(AUREHERB_BUNDLE_PAIR_PRICE, 0)
+            )
+        );
+        ?>
+      </a>
+    </p>
+  </div>
+</section>
+
 <section class="section content-container" aria-labelledby="testimonials-heading">
   <h2 id="testimonials-heading" class="section-title"><?php esc_html_e('Testimonials', 'aureherb'); ?></h2>
   <p class="section-lead"><?php esc_html_e('What people say about AureHerb Hair Growth Oil.', 'aureherb'); ?></p>
