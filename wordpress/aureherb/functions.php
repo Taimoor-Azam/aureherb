@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AUREHERB_VERSION', '1.0.17');
+define('AUREHERB_VERSION', '1.0.18');
 define('AUREHERB_SHIPPING_FLAT', 0);
 define('AUREHERB_FREE_SHIPPING_MIN', 0);
 define('AUREHERB_BUNDLE_SLUG', 'hair-growth-oil');
@@ -346,26 +346,7 @@ add_action('woocommerce_cart_calculate_fees', function ($cart) {
     $cart->add_fee(__('Bundle offer', 'aureherb'), -1 * $discount, false);
 });
 
-/** Bundle banner on PDP (Hair Growth Oil only). */
-add_action('woocommerce_before_add_to_cart_form', function () {
-    global $product;
-    if (!aureherb_is_bundle_product($product)) {
-        return;
-    }
-    $banner = aureherb_asset('images/aureherb-bundle-offer.jpg');
-    ?>
-    <div class="bundle-offer-pdp-banner" data-bundle-banner>
-      <img
-        src="<?php echo esc_url($banner); ?>"
-        alt="<?php esc_attr_e('Bundle offer — Buy 2 bottles for Rs 2,499', 'aureherb'); ?>"
-        width="1122"
-        height="1402"
-        loading="lazy"
-      >
-    </div>
-    <?php
-});
-
+/** 1 vs 2 bottle offer strip on PDP (Hair Growth Oil only). */
 add_action('woocommerce_before_add_to_cart_button', function () {
     global $product;
     if (!aureherb_is_bundle_product($product)) {
