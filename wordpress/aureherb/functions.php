@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AUREHERB_VERSION', '1.0.14');
+define('AUREHERB_VERSION', '1.0.15');
 define('AUREHERB_SHIPPING_FLAT', 0);
 define('AUREHERB_FREE_SHIPPING_MIN', 0);
 
@@ -107,21 +107,65 @@ add_filter('woocommerce_get_country_locale', function ($locale) {
         if (!isset($locale[$key]) || !is_array($locale[$key])) {
             $locale[$key] = [];
         }
-        foreach (['postcode', 'state', 'company', 'address_2', 'last_name'] as $field) {
+        foreach (['postcode', 'company', 'address_2', 'last_name'] as $field) {
             $locale[$key][$field] = array_merge($locale[$key][$field] ?? [], $hide);
         }
         $locale[$key]['first_name'] = array_merge($locale[$key]['first_name'] ?? [], [
             'label' => __('Full name', 'aureherb'),
             'required' => true,
         ]);
+        $locale[$key]['state'] = array_merge($locale[$key]['state'] ?? [], [
+            'label' => __('Province', 'aureherb'),
+            'required' => true,
+            'hidden' => false,
+        ]);
         $locale[$key]['city'] = array_merge($locale[$key]['city'] ?? [], ['required' => true]);
         $locale[$key]['address_1'] = array_merge($locale[$key]['address_1'] ?? [], [
             'label' => __('Address', 'aureherb'),
             'required' => true,
         ]);
+        // Country stays PK; hide from UI (value still posted via checkout field filters).
+        $locale[$key]['country'] = array_merge($locale[$key]['country'] ?? [], [
+            'required' => false,
+            'hidden' => true,
+        ]);
     }
     return $locale;
 });
+
+/** Default checkout destination to Pakistan so free delivery zone matches. */
+add_filter('default_checkout_billing_country', function () {
+    return 'PK';
+});
+add_filter('default_checkout_shipping_country', function () {
+    return 'PK';
+});
+add_filter('woocommerce_customer_default_location', function () {
+    return 'PK';
+});
+add_filter('woocommerce_ship_to_billing_address_only', '__return_true');
+add_filter('woocommerce_cart_needs_shipping_address', '__return_false');
+
+/** Prefer the single available rate (free delivery) when Woo has not chosen one yet. */
+add_filter('woocommerce_shipping_chosen_method', function ($method, $available_methods, $package = []) {
+    if (!empty($method) && isset($available_methods[$method])) {
+        return $method;
+    }
+    if (is_array($available_methods) && count($available_methods) === 1) {
+        return (string) array_key_first($available_methods);
+    }
+    if (is_array($available_methods)) {
+        foreach ($available_methods as $id => $rate) {
+            if (is_object($rate) && strpos((string) $id, 'free_shipping') === 0) {
+                return (string) $id;
+            }
+        }
+        if (!empty($available_methods)) {
+            return (string) array_key_first($available_methods);
+        }
+    }
+    return $method;
+}, 10, 3);
 
 add_action('after_switch_theme', function () {
     if (get_option('aureherb_setup_done')) {
@@ -246,8 +290,10 @@ add_filter('woocommerce_default_address_fields', function ($fields) {
         $fields['address_2']['hidden'] = true;
     }
     if (isset($fields['state'])) {
-        $fields['state']['required'] = false;
-        $fields['state']['hidden'] = true;
+        $fields['state']['label'] = __('Province', 'aureherb');
+        $fields['state']['required'] = true;
+        $fields['state']['hidden'] = false;
+        $fields['state']['class'] = ['form-row-wide'];
     }
     if (isset($fields['last_name'])) {
         $fields['last_name']['required'] = false;
@@ -260,6 +306,11 @@ add_filter('woocommerce_default_address_fields', function ($fields) {
     if (isset($fields['address_1'])) {
         $fields['address_1']['label'] = __('Address', 'aureherb');
     }
+    if (isset($fields['country'])) {
+        $fields['country']['required'] = false;
+        $fields['country']['hidden'] = true;
+        $fields['country']['default'] = 'PK';
+    }
     return $fields;
 });
 
@@ -268,7 +319,6 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
         'billing_postcode',
         'billing_company',
         'billing_address_2',
-        'billing_state',
         'billing_last_name',
     ];
     foreach ($remove_billing as $key) {
@@ -281,6 +331,7 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
         'shipping_address_2',
         'shipping_state',
         'shipping_last_name',
+        'shipping_country',
     ];
     foreach ($remove_shipping as $key) {
         unset($fields['shipping'][$key]);
@@ -296,15 +347,25 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
         $fields['billing']['billing_phone']['priority'] = 20;
     }
     if (isset($fields['billing']['billing_email'])) {
-        $fields['billing']['billing_email']['required'] = false;
+        $fields['billing']['billing_email']['required'] = true;
         $fields['billing']['billing_email']['priority'] = 25;
     }
+    // Keep country select in the DOM (value PK) so province options load; hide via CSS.
     if (isset($fields['billing']['billing_country'])) {
+        $fields['billing']['billing_country']['required'] = true;
+        $fields['billing']['billing_country']['default'] = 'PK';
+        $fields['billing']['billing_country']['class'] = ['form-row-wide', 'aureherb-hidden-country'];
         $fields['billing']['billing_country']['priority'] = 30;
     }
     if (isset($fields['billing']['billing_city'])) {
         $fields['billing']['billing_city']['required'] = true;
         $fields['billing']['billing_city']['priority'] = 40;
+    }
+    if (isset($fields['billing']['billing_state'])) {
+        $fields['billing']['billing_state']['label'] = __('Province', 'aureherb');
+        $fields['billing']['billing_state']['required'] = true;
+        $fields['billing']['billing_state']['class'] = ['form-row-wide'];
+        $fields['billing']['billing_state']['priority'] = 45;
     }
     if (isset($fields['billing']['billing_address_1'])) {
         $fields['billing']['billing_address_1']['label'] = __('Address', 'aureherb');
@@ -329,6 +390,12 @@ add_filter('woocommerce_checkout_posted_data', function ($data) {
     if (empty($data['shipping_last_name']) && !empty($data['billing_first_name'])) {
         $data['shipping_last_name'] = '-';
     }
+    if (empty($data['billing_country'])) {
+        $data['billing_country'] = 'PK';
+    }
+    if (empty($data['shipping_country'])) {
+        $data['shipping_country'] = 'PK';
+    }
     return $data;
 });
 
@@ -339,13 +406,26 @@ add_filter('woocommerce_billing_fields', function ($fields) {
     return $fields;
 });
 
-/** Allow guest checkout without email when phone is present. */
-add_filter('woocommerce_checkout_fields', function ($fields) {
-    if (isset($fields['billing']['billing_email'])) {
-        $fields['billing']['billing_email']['required'] = false;
+/** Force customer session country to PK so rates calculate before address entry. */
+add_action('woocommerce_checkout_init', function () {
+    if (!function_exists('WC') || !WC()->customer) {
+        return;
     }
-    return $fields;
-}, 20);
+    WC()->customer->set_billing_country('PK');
+    WC()->customer->set_shipping_country('PK');
+}, 5);
+
+add_action('woocommerce_before_calculate_totals', function () {
+    if (!function_exists('WC') || !WC()->customer) {
+        return;
+    }
+    if (WC()->customer->get_billing_country() !== 'PK') {
+        WC()->customer->set_billing_country('PK');
+    }
+    if (WC()->customer->get_shipping_country() !== 'PK') {
+        WC()->customer->set_shipping_country('PK');
+    }
+}, 5);
 
 add_action('woocommerce_after_checkout_validation', function ($data, $errors) {
     if (!$errors instanceof WP_Error) {
