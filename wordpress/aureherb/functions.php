@@ -149,6 +149,9 @@ add_filter('woocommerce_ship_to_billing_address_only', '__return_true');
 add_filter('pre_option_woocommerce_checkout_phone_field', function () {
     return 'required';
 });
+add_action('woocommerce_checkout_init', function () {
+    update_option('woocommerce_checkout_phone_field', 'required');
+}, 1);
 add_filter('woocommerce_get_country_locale', function ($locale) {
     foreach (array_keys($locale) as $country) {
         if (!isset($locale[$country]) || !is_array($locale[$country])) {
@@ -166,6 +169,43 @@ add_filter('woocommerce_get_country_locale', function ($locale) {
     ]);
     return $locale;
 }, 20);
+/** Keep phone marked required after WC address-i18n.js rewrites labels. */
+add_action('wp_footer', function () {
+    if (!function_exists('is_checkout') || !is_checkout() || is_order_received_page()) {
+        return;
+    }
+    ?>
+    <script>
+    (function () {
+      function forcePhoneRequired() {
+        var field = document.getElementById('billing_phone_field');
+        var input = document.getElementById('billing_phone');
+        if (!field || !input) return;
+        field.classList.add('validate-required');
+        field.classList.remove('woocommerce-invalid-required-field');
+        input.setAttribute('aria-required', 'true');
+        input.required = true;
+        var label = field.querySelector('label');
+        if (!label) return;
+        var optional = label.querySelector('.optional');
+        if (optional) optional.remove();
+        if (!label.querySelector('.required')) {
+          label.insertAdjacentHTML('beforeend', '&nbsp;<abbr class="required" title="required">*</abbr>');
+        }
+        var text = label.childNodes[0];
+        if (text && text.nodeType === 3) {
+          text.textContent = text.textContent.replace(/\s*\(optional\)\s*/i, ' ').replace(/\s+$/, '');
+        }
+      }
+      document.addEventListener('DOMContentLoaded', forcePhoneRequired);
+      jQuery(function ($) {
+        forcePhoneRequired();
+        $(document.body).on('updated_checkout country_to_state_changed', forcePhoneRequired);
+      });
+    })();
+    </script>
+    <?php
+}, 99);
 
 /** Prefer the single available rate (free delivery) when Woo has not chosen one yet. */
 add_filter('woocommerce_shipping_chosen_method', function ($method, $available_methods, $package = []) {
