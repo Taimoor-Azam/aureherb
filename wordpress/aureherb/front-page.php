@@ -74,7 +74,7 @@ $testimonials = [
         <?php foreach ($products as $product) : ?>
           <li class="product-card">
             <a href="<?php echo esc_url($product->get_permalink()); ?>">
-              <?php echo $product->get_image('woocommerce_thumbnail'); ?>
+              <?php echo $product->get_image('woocommerce_single'); ?>
               <div class="product-card-body">
                 <h3><?php echo esc_html($product->get_name()); ?></h3>
                 <p class="price"><?php echo wp_kses_post($product->get_price_html()); ?></p>
@@ -119,6 +119,20 @@ $testimonials = [
     <p><?php esc_html_e('Unlike ordinary hair oils, AureHerb is enriched with multiple botanical oils and herbal extracts that work together to provide complete scalp and hair nourishment.', 'aureherb'); ?></p>
   </div>
 </section>
+
+<?php
+// SEO/AEO body content from the Home page (plugin or editor), when present.
+while (have_posts()) {
+    the_post();
+    $seo_body = trim((string) get_the_content());
+    if ($seo_body !== '') {
+        echo '<section class="section content-container legal seo-home-content" aria-label="' . esc_attr__('More about AureHerb', 'aureherb') . '">';
+        echo '<div class="seo-home-inner">';
+        the_content();
+        echo '</div></section>';
+    }
+}
+?>
 
 <?php
 get_footer();

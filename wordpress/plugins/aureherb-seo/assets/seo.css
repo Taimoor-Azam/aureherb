@@ -1,0 +1,91 @@
+.hero-intro {
+  padding: 1.5rem 0 0.5rem;
+  max-width: 40rem;
+}
+
+.hero-intro h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin: 0 0 0.75rem;
+}
+
+.hero-intro p {
+  margin: 0;
+  color: var(--herb-mist);
+  font-size: 1.05rem;
+}
+
+.seo-faq {
+  margin: 2rem 0;
+}
+
+.seo-faq h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.seo-faq-item {
+  border-top: 1px solid var(--herb-clay);
+  padding: 0.75rem 0;
+}
+
+.seo-faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.seo-faq-item p {
+  margin: 0.5rem 0 0;
+  color: var(--herb-mist);
+}
+
+.howto-steps {
+  padding-left: 1.2rem;
+}
+
+.howto-steps li {
+  margin: 0.75rem 0;
+}
+
+.seo-cta {
+  margin: 1.5rem 0 0;
+}
+
+.seo-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.5rem;
+}
+
+.seo-table th,
+.seo-table td {
+  border: 1px solid var(--herb-clay);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.legal h2,
+.legal h3 {
+  font-family: var(--font-display);
+}
+
+.legal a {
+  text-decoration: underline;
+}
+
+.journal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.journal-list li {
+  border-bottom: 1px solid var(--herb-clay);
+  padding: 1.25rem 0;
+}
+
+.journal-list h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin: 0 0 0.4rem;
+}

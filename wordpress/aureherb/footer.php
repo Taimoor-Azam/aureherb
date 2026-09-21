@@ -11,9 +11,29 @@ if (!defined('ABSPATH')) {
       <div>
         <h2><?php esc_html_e('Social Media', 'aureherb'); ?></h2>
         <div class="socials">
-          <a href="https://www.facebook.com/share/1HPAidoQoY/" target="_blank" rel="noopener noreferrer" aria-label="AureHerb on Facebook">Facebook</a>
-          <a href="https://www.instagram.com/aureherbofficial" target="_blank" rel="noopener noreferrer" aria-label="AureHerb on Instagram">Instagram</a>
+          <a href="https://www.facebook.com/share/1HPAidoQoY/" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e('AureHerb on Facebook', 'aureherb'); ?>">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14C17.174 2.097 15.943 2 14.643 2 11.928 2 10 3.657 10 6.7V9.5H7v4h3V22h4v-8.5z" fill="currentColor"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/aureherbofficial" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e('AureHerb on Instagram', 'aureherb'); ?>">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm11 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zM12 7.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" fill="currentColor"/>
+            </svg>
+          </a>
         </div>
+      </div>
+      <div>
+        <h2><?php esc_html_e('Learn', 'aureherb'); ?></h2>
+        <ul>
+          <li><a href="<?php echo esc_url(home_url('/about/')); ?>"><?php esc_html_e('About', 'aureherb'); ?></a></li>
+          <li><a href="<?php echo esc_url(home_url('/contact/')); ?>"><?php esc_html_e('Contact', 'aureherb'); ?></a></li>
+          <li><a href="<?php echo esc_url(home_url('/faq/')); ?>"><?php esc_html_e('FAQ', 'aureherb'); ?></a></li>
+          <li><a href="<?php echo esc_url(home_url('/how-to-use/')); ?>"><?php esc_html_e('How to use', 'aureherb'); ?></a></li>
+          <li><a href="<?php echo esc_url(home_url('/ingredients/')); ?>"><?php esc_html_e('Ingredients', 'aureherb'); ?></a></li>
+          <li><a href="<?php echo esc_url(home_url('/shipping/')); ?>"><?php esc_html_e('Shipping', 'aureherb'); ?></a></li>
+          <li><a href="<?php echo esc_url(home_url('/journal/')); ?>"><?php esc_html_e('Journal', 'aureherb'); ?></a></li>
+        </ul>
       </div>
       <div>
         <h2><?php esc_html_e('Help', 'aureherb'); ?></h2>

@@ -15,7 +15,7 @@ This folder is a drop-in theme for Hostinger WordPress. It matches the current N
 5. WooCommerce → Settings:
    - Currency **PKR**, selling location **Pakistan** (the theme sets these on first activate).
    - Payments: enable **Cash on delivery**.
-   - Shipping: flat Rs **249**, free shipping at **Rs 3,000**.
+   - Shipping: **free** with cash on delivery.
 6. Add product **AureHerb Hair Growth Oil** with PKR price and images.
 7. Pages: WooCommerce creates Shop, Cart, Checkout, My Account. Create:
    - **Privacy Policy** and **Terms of Use** (footer links `/privacy-policy/` and `/terms-of-use/`).
