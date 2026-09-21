@@ -3,7 +3,7 @@ Theme Name: AureHerb
 Theme URI: https://www.aureherb.com
 Author: AureHerb
 Description: WooCommerce theme matching the AureHerb Next.js shop — herb sand palette, Fraunces display type, hero oiling video, COD-ready.
-Version: 1.0.11
+Version: 1.0.13
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.0
@@ -388,7 +388,7 @@ a:hover {
 
 .product-card img {
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
   display: block;
 }
@@ -580,4 +580,89 @@ a.button,
   margin: 1rem 0;
   color: var(--herb-mist);
   font-size: 0.9rem;
+}
+
+.delivered-total {
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  background: rgba(47, 74, 56, 0.06);
+  border: 1px solid var(--herb-clay);
+}
+
+.delivered-total-main {
+  margin: 0;
+  font-weight: 600;
+  color: var(--herb-ink);
+  font-size: 1.05rem;
+}
+
+.delivered-total-sub {
+  margin: 0.35rem 0 0;
+  color: var(--herb-mist);
+  font-size: 0.9rem;
+}
+
+.checkout-trust-note {
+  margin: 0 0 1rem;
+  color: var(--herb-mist);
+  font-size: 0.9rem;
+}
+
+.buy-now-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .buy-now-bar:not([hidden]) {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1100;
+    background: #fff;
+    border-top: 1px solid var(--herb-clay);
+    box-shadow: 0 -6px 24px rgba(28, 45, 34, 0.12);
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .buy-now-bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    max-width: 40rem;
+    margin: 0 auto;
+  }
+
+  .buy-now-bar-price {
+    margin: 0;
+    font-weight: 600;
+    color: var(--herb-ink);
+    font-size: 0.95rem;
+  }
+
+  .buy-now-bar-btn {
+    flex-shrink: 0;
+    margin: 0 !important;
+  }
+
+  html.has-buy-now-bar .whatsapp-fab {
+    bottom: 5.5rem;
+  }
+
+  html.has-buy-now-bar body {
+    padding-bottom: 5rem;
+  }
+}
+
+.woocommerce form.cart .single_add_to_cart_button {
+  width: 100%;
+  text-align: center;
+}
+
+@media (min-width: 769px) {
+  .woocommerce form.cart .single_add_to_cart_button {
+    width: auto;
+  }
 }
