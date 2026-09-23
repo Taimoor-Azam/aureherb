@@ -3,7 +3,7 @@ Theme Name: AureHerb
 Theme URI: https://www.aureherb.com
 Author: AureHerb
 Description: WooCommerce theme matching the AureHerb Next.js shop — herb sand palette, Fraunces display type, hero oiling video, COD-ready.
-Version: 1.0.18
+Version: 1.0.19
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.0
@@ -617,6 +617,127 @@ a.button,
   margin: 0.35rem 0 0;
   color: var(--herb-mist);
   font-size: 0.9rem;
+}
+
+/* PDP conversion blocks (additive — Hair Growth Oil) */
+.pdp-trust-row {
+  list-style: none;
+  margin: 0.75rem 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.85rem;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--herb-leaf);
+  font-weight: 600;
+}
+
+.pdp-trust-row li {
+  margin: 0;
+  padding: 0;
+}
+
+.pdp-trust-row li::before {
+  content: "✓ ";
+  color: var(--herb-moss);
+}
+
+.pdp-benefits {
+  margin: 0 0 1.15rem;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid var(--herb-clay);
+  font-family: var(--font-sans);
+}
+
+.pdp-benefits-outcome {
+  margin: 0 0 0.65rem;
+  font-weight: 600;
+  color: var(--herb-ink);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.pdp-benefits-list {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  color: var(--herb-mist);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.pdp-benefits-list li {
+  margin: 0.2rem 0;
+}
+
+.pdp-benefits-expect {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
+  color: var(--herb-leaf);
+  font-weight: 500;
+}
+
+.pdp-featured-review {
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--herb-clay);
+  background: rgba(47, 74, 56, 0.04);
+  font-family: var(--font-sans);
+}
+
+.pdp-featured-review-stars {
+  margin: 0;
+  color: var(--herb-gold);
+  letter-spacing: 0.05em;
+  font-size: 0.95rem;
+}
+
+.pdp-featured-review-quote {
+  margin: 0.4rem 0 0;
+  color: var(--herb-ink);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-style: normal;
+}
+
+.pdp-featured-review-name {
+  margin: 0.45rem 0 0;
+  color: var(--herb-mist);
+  font-size: 0.85rem;
+}
+
+.pdp-how-to-use {
+  margin: 1.35rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--herb-clay);
+  font-family: var(--font-sans);
+}
+
+.pdp-how-to-use-title {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--herb-ink);
+}
+
+.pdp-how-to-use-steps {
+  margin: 0;
+  padding: 0 0 0 1.2rem;
+  color: var(--herb-mist);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.pdp-how-to-use-steps li {
+  margin: 0.25rem 0;
+}
+
+.pdp-how-to-use-bundle {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--herb-leaf);
 }
 
 /* Homepage + PDP Buy-2 bundle offer */
