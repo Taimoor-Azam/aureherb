@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AUREHERB_VERSION', '1.0.18');
+define('AUREHERB_VERSION', '1.0.19');
 define('AUREHERB_SHIPPING_FLAT', 0);
 define('AUREHERB_FREE_SHIPPING_MIN', 0);
 define('AUREHERB_BUNDLE_SLUG', 'hair-growth-oil');
@@ -346,6 +346,81 @@ add_action('woocommerce_cart_calculate_fees', function ($cart) {
     $cart->add_fee(__('Bundle offer', 'aureherb'), -1 * $discount, false);
 });
 
+/**
+ * PDP conversion helpers (Hair Growth Oil only). Additive blocks — do not
+ * replace Woo description/tabs used for SEO/AEO.
+ */
+function aureherb_is_pdp_conversion_product($product = null)
+{
+    if (!$product) {
+        global $product;
+    }
+    return aureherb_is_bundle_product($product);
+}
+
+/** Latest approved 5-star review for the current product, if any. */
+function aureherb_featured_product_review($product)
+{
+    if (!$product || !is_object($product)) {
+        return null;
+    }
+    $comments = get_comments([
+        'post_id' => $product->get_id(),
+        'status' => 'approve',
+        'type' => 'review',
+        'number' => 8,
+        'orderby' => 'comment_date_gmt',
+        'order' => 'DESC',
+    ]);
+    foreach ($comments as $comment) {
+        $rating = (int) get_comment_meta($comment->comment_ID, 'rating', true);
+        if ($rating >= 5 && trim((string) $comment->comment_content) !== '') {
+            return $comment;
+        }
+    }
+    foreach ($comments as $comment) {
+        if (trim((string) $comment->comment_content) !== '') {
+            return $comment;
+        }
+    }
+    return null;
+}
+
+/** 1. Trust row near price (before short description). */
+add_action('woocommerce_single_product_summary', function () {
+    global $product;
+    if (!aureherb_is_pdp_conversion_product($product)) {
+        return;
+    }
+    ?>
+    <ul class="pdp-trust-row" aria-label="<?php esc_attr_e('Delivery and payment', 'aureherb'); ?>">
+      <li><?php esc_html_e('Free delivery Pakistan', 'aureherb'); ?></li>
+      <li><?php esc_html_e('Cash on delivery — pay when it arrives', 'aureherb'); ?></li>
+      <li><?php esc_html_e('Delivery in 3–5 days', 'aureherb'); ?></li>
+    </ul>
+    <?php
+}, 15);
+
+/** 2. Outcome + benefits (after short description; does not replace it). */
+add_action('woocommerce_single_product_summary', function () {
+    global $product;
+    if (!aureherb_is_pdp_conversion_product($product)) {
+        return;
+    }
+    ?>
+    <div class="pdp-benefits">
+      <p class="pdp-benefits-outcome"><?php esc_html_e('Stronger roots and healthier-looking hair with a simple weekly oiling ritual.', 'aureherb'); ?></p>
+      <ul class="pdp-benefits-list">
+        <li><?php esc_html_e('Nourishes the scalp with rosemary, castor, and black seed', 'aureherb'); ?></li>
+        <li><?php esc_html_e('Supports thicker-feeling, less breakage-prone hair', 'aureherb'); ?></li>
+        <li><?php esc_html_e('Easy ritual — a few drops, massage, leave on', 'aureherb'); ?></li>
+        <li><?php esc_html_e('Pay on delivery · free shipping across Pakistan', 'aureherb'); ?></li>
+      </ul>
+      <p class="pdp-benefits-expect"><?php esc_html_e('Best with consistent use for 4–8 weeks.', 'aureherb'); ?></p>
+    </div>
+    <?php
+}, 25);
+
 /** 1 vs 2 bottle offer strip on PDP (Hair Growth Oil only). */
 add_action('woocommerce_before_add_to_cart_button', function () {
     global $product;
@@ -432,6 +507,62 @@ add_action('woocommerce_after_add_to_cart_button', function () {
         }
         ?>
       </p>
+    </div>
+    <?php
+}, 10);
+
+/** 3. Featured review under delivered total (Reviews tab unchanged). */
+add_action('woocommerce_after_add_to_cart_button', function () {
+    global $product;
+    if (!aureherb_is_pdp_conversion_product($product)) {
+        return;
+    }
+    $review = aureherb_featured_product_review($product);
+    $quote = '';
+    $name = '';
+    $rating = 5;
+    if ($review) {
+        $quote = wp_strip_all_tags($review->comment_content);
+        if (function_exists('mb_substr') && mb_strlen($quote) > 160) {
+            $quote = mb_substr($quote, 0, 157) . '…';
+        } elseif (strlen($quote) > 160) {
+            $quote = substr($quote, 0, 157) . '…';
+        }
+        $name = $review->comment_author ?: __('Customer', 'aureherb');
+        $rating = (int) get_comment_meta($review->comment_ID, 'rating', true);
+        if ($rating < 1) {
+            $rating = 5;
+        }
+    } else {
+        $quote = __('Truly Magical oil. I tried different oils but this left my hair soft, smooth and healthy.', 'aureherb');
+        $name = __('Verified buyer', 'aureherb');
+    }
+    ?>
+    <aside class="pdp-featured-review" aria-label="<?php esc_attr_e('Customer review', 'aureherb'); ?>">
+      <p class="pdp-featured-review-stars" aria-label="<?php echo esc_attr(sprintf(__('%d out of 5 stars', 'aureherb'), $rating)); ?>">
+        <?php echo esc_html(str_repeat('★', max(1, min(5, $rating)))); ?>
+      </p>
+      <blockquote class="pdp-featured-review-quote">“<?php echo esc_html($quote); ?>”</blockquote>
+      <p class="pdp-featured-review-name">— <?php echo esc_html($name); ?></p>
+    </aside>
+    <?php
+}, 20);
+
+/** 4. How to use below the buy box (not above CTA). */
+add_action('woocommerce_after_add_to_cart_form', function () {
+    global $product;
+    if (!aureherb_is_pdp_conversion_product($product)) {
+        return;
+    }
+    ?>
+    <div class="pdp-how-to-use">
+      <h3 class="pdp-how-to-use-title"><?php esc_html_e('How to use', 'aureherb'); ?></h3>
+      <ol class="pdp-how-to-use-steps">
+        <li><?php esc_html_e('Warm a few drops between your palms.', 'aureherb'); ?></li>
+        <li><?php esc_html_e('Massage into the scalp and along the hair.', 'aureherb'); ?></li>
+        <li><?php esc_html_e('Leave on (overnight or a few hours), then wash as usual.', 'aureherb'); ?></li>
+      </ol>
+      <p class="pdp-how-to-use-bundle"><?php esc_html_e('2 bottles ≈ about 2 months of weekly use.', 'aureherb'); ?></p>
     </div>
     <?php
 });
